@@ -34,7 +34,7 @@ try {
             $res->code = 100;
             $res->message = "테스트 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
+           break;
         /*
          * API No. 0
          * API Name : 테스트 Path Variable API
@@ -59,6 +59,16 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "테스트 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "createUser":
+            http_response_code(200);
+            $res->result = createUser($req->name,$req->email,$req->nick,$req->profileImg,$req->phone
+                ,$req->region,$req->birth,$req->SNS,$req->sex,$req->snsToken,$req->FCMToken);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 생성 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
     }

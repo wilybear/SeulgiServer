@@ -1,6 +1,8 @@
 <?php
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
+require './pdos/UserPdo.php';
+require './pdos/SeulgiPdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
@@ -10,7 +12,7 @@ date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
 //에러출력하게 하는 코드
-//error_reporting(E_ALL); ini_set("display_errors", 1);
+error_reporting(E_ALL); ini_set("display_errors", 1);
 
 //Main Server API
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
@@ -21,7 +23,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/test', ['IndexController', 'testPost']);
     $r->addRoute('GET', '/jwt', ['MainController', 'validateJwt']);
     $r->addRoute('POST', '/jwt', ['MainController', 'createJwt']);
-    
+
+
+    /***** User ******/
+    $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
+
+    /***** Seulgi *****/
+    $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
 
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');
