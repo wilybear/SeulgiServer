@@ -42,6 +42,7 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
                 $st->execute([$resume_id,$detail_id,$talent_cat_id]);
             }
             //대분류 category는 중복해서 쓰지 못함
+
             $query = "INSERT INTO TalentHave (resume_id,talentCategory,introduction,academic_bg,career,certificate,curriculum) VALUES (?,?,?,?,?,?,?)";
             $st = $pdo->prepare($query);
             $st->execute([$resume_id,$talent_cat_id,$talent->introduction,$talent->academic_bg,$talent->career,$talent->certificate,$talent->curriculum]);
@@ -71,6 +72,32 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
     $pdo = null;
 
 }
+
+function createReview($reviewer_id,$resume_id,$content,$rate){
+    $pdo = pdoSqlConnect();
+    //TODO: exchange기록이 있는 사람만, 여러번 제한, 자기 자신 불가
+    $query = "INSERT INTO Review (reviewer_id,resume_id,content,rate) VALUES (?,?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$reviewer_id,$resume_id,$content,$rate]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+function createExchangeReq($sender_id,$resume_id){
+    $pdo = pdoSqlConnect();
+    //TODO: 여러번 신청 제한, sender != reviewer
+    $query = "INSERT INTO ExchangeRequest (sender_id,resume_id) VALUES (?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$sender_id,$resume_id]);
+
+    $st = null;
+    $pdo = null;
+}
+
 
 function getCategoryId($category){
     $pdo = pdoSqlConnect();

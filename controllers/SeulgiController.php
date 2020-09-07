@@ -37,6 +37,22 @@ try {
             $res->message = "유저 생성 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "createReview":
+            http_response_code(200);
+            $res->result = createReview($req->reviewer_id,$req->resume_id,$req->content,$req->rate);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "리뷰 생성 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "createExchangeReq":
+            http_response_code(200);
+            $res->result = createExchangeReq($req->sender_id,$req->resume_id);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환 요청 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);
