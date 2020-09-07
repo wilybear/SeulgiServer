@@ -30,7 +30,8 @@ try {
          */
         case "createResume":
             http_response_code(200);
-            $res->result = createResume($req);
+            $res->result = createResume($req->user_id,$req->title,$req->introduction,$req->talent_images,$req->isOnLine
+                ,$req->desired_day,$req->desired_region,$req->talent_have,$req->talent_want);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 생성 성공";

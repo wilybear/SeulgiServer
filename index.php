@@ -88,10 +88,12 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/MainController.php';
                 break;
-            /*case 'EventController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/EventController.php';
+            case 'SeulgiController':
+                $handler = $routeInfo[1][1];
+                $vars = $routeInfo[2];
+                require './controllers/SeulgiController.php';
                 break;
+                /*
             case 'ProductController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
                 require './controllers/ProductController.php';
