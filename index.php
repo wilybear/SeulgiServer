@@ -30,6 +30,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     /***** Seulgi *****/
     $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
+    $r->addRoute('GET', '/seulgi/resume/{resumeId}', ['SeulgiController', 'getResume']);
+
+
     $r->addRoute('POST', '/seulgi/resume/review', ['SeulgiController', 'createReview']);
     $r->addRoute('POST', '/seulgi/resume/exchange', ['SeulgiController', 'createExchangeReq']);
     //TODO: 수정, 삭제(교환 요청은 제외), 조회

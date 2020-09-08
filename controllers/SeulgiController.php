@@ -31,10 +31,18 @@ try {
         case "createResume":
             http_response_code(200);
             $res->result = createResume($req->user_id,$req->title,$req->introduction,$req->talent_images,$req->isOnLine
-                ,$req->desired_day,$req->desired_region,$req->talent_have,$req->talent_want);
+                ,$req->desired_day,$req->desired_regions,$req->talent_have,$req->talent_want);
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "유저 생성 성공";
+            $res->message = "교환서 생성 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getResume":
+            http_response_code(200);
+            $res->result = getResumeData($vars["resumeId"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 불러오기 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "createReview":
