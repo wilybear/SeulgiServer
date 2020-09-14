@@ -27,6 +27,10 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     /***** User ******/
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
+    $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
+    $r->addRoute('DELETE', '/user/{userId}', ['IndexController', 'deleteUser']);
+    $r->addRoute('GET', '/user/{userId}', ['IndexController', 'getUserInfo']);
+
 
     /***** Seulgi *****/
     $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);

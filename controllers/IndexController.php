@@ -71,6 +71,32 @@ try {
             $res->message = "유저 생성 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "deleteUser":
+            http_response_code(200);
+            $res->result = deleteUser($vars["userId"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 삭제 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getUserInfo":
+            http_response_code(200);
+            $res->result = getUserInfo($vars["userId"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "updateUser":
+
+                http_response_code(200);
+            $res->result = updateUser($req->nick,$req->profileImg,$req->phone
+                ,$req->region,$req->user_id);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

@@ -74,31 +74,31 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
 }
 
 
-function updateResume($user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
+function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
                       $talent_have,$talent_want)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
-        //교환서 기본 사항 저장 TODO: 중복처리
-        $query = "INSERT INTO TalentResume (user_id,title, introduction, isOnLine) VALUES (?,?,?,?);";
+        //교환서 기본 사항 수정
+        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ? WHERE resume_id = ?";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id,$title,$introduction,$isOnLine]);
-        $resume_id = $pdo->lastInsertId();
+        $st->execute([$user_id,$title,$introduction,$isOnLine,$resume_id]);
 
-        //교환서 이미지 저장 TODO: 갯수 제한, 중복처리
+        //여기서부터 해야함
+        //TODO:교환서 이미지는 고민해보자
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
             $st->execute([$resume_id,$talent_image->talent_image]);
         }
 
-        //희망 요일 저장  TODO: 중복처리
-        $query = "INSERT INTO DesiredDay (resume_id, mon, tue, wed, thu, fri, sat, sun) VALUES (?,?,?,?,?,?,?,?)";
+        //희망 요일 수정
+        $query = "UPDATE DesiredDay SET mon=?, tue=?, wed=?, thu=?, fri=?, sat=?, sun=? WHERE resume_id = ?";
         $st = $pdo->prepare($query);
-        $st->execute([$resume_id,$desired_day->mon,$desired_day->tue,$desired_day->wed,$desired_day->thu,$desired_day->fri,$desired_day->sat,$desired_day->sun]);
+        $st->execute([$desired_day->mon,$desired_day->tue,$desired_day->wed,$desired_day->thu,$desired_day->fri,$desired_day->sat,$desired_day->sun,$resume_id]);
 
-        //희망 지역 TODO: 중복처리
+        //TODO:희망 수정도 고민해보자
         $query = "INSERT INTO Region (resume_id,desired_region) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($desired_regions as $desired_region){
