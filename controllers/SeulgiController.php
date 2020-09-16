@@ -45,7 +45,17 @@ try {
             $res->message = "교환서 불러오기 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+
+        case "deleteResume":
+            http_response_code(200);
+            $res->result = deleteResume($vars["resumeId"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 삭제 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
         case "createReview":
+            //중복생성 못하게
             http_response_code(200);
             $res->result = createReview($req->reviewer_id,$req->resume_id,$req->content,$req->rate);
             $res->isSuccess = TRUE;
@@ -53,6 +63,31 @@ try {
             $res->message = "리뷰 생성 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "deleteReview":
+            http_response_code(200);
+            $res->result = deleteReview($vars["reviewId"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "리뷰 삭제 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getReviews":
+            http_response_code(200);
+            $res->result = getReviews($_GET["resume_id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "리뷰 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "updateReview":
+            http_response_code(200);
+            $res->result = updateReview($req->resume_id,$req->content,$req->rate);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "리뷰 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+            
         case "createExchangeReq":
             http_response_code(200);
             $res->result = createExchangeReq($req->sender_id,$req->resume_id);
@@ -61,6 +96,7 @@ try {
             $res->message = "교환 요청 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);
