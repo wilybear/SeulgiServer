@@ -81,12 +81,19 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
     try {
         $pdo->beginTransaction();
         //교환서 기본 사항 수정
-        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ? WHERE resume_id = ?";
+        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ? WHERE resume_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$user_id,$title,$introduction,$isOnLine,$resume_id]);
 
-        //여기서부터 해야함
-        //TODO:교환서 이미지는 고민해보자
+
+        $TABLES = ["TalentHave", "TalentWant", "TalentImage","Region","DetailedWant","DetailedHave"];
+        foreach ($TABLES as $TABLE){
+            $query = "UPDATE ".$TABLE." set isDeleted = 1 WHERE resume_id = ? and isDeleted = 0 ;";
+            $st = $pdo->prepare($query);
+            $st->execute([$resume_id]);
+        }
+
+        //이미지 추가
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
@@ -94,11 +101,11 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
         }
 
         //희망 요일 수정
-        $query = "UPDATE DesiredDay SET mon=?, tue=?, wed=?, thu=?, fri=?, sat=?, sun=? WHERE resume_id = ?";
+        $query = "UPDATE DesiredDay SET mon=?, tue=?, wed=?, thu=?, fri=?, sat=?, sun=? WHERE resume_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$desired_day->mon,$desired_day->tue,$desired_day->wed,$desired_day->thu,$desired_day->fri,$desired_day->sat,$desired_day->sun,$resume_id]);
 
-        //TODO:희망 수정도 고민해보자
+
         $query = "INSERT INTO Region (resume_id,desired_region) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($desired_regions as $desired_region){
@@ -149,36 +156,38 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
 
 function getResumeData($resume_id){
     $pdo = pdoSqlConnect();
+    
+    //record가 여러개인 테이블들에는 기존 데이터를 삭제하고 새로운 데이터를 넣어줌
 
     //이력서 기본정보 불러오기
-    $query = "SELECT user_id, title, introduction, isOnLine FROM TalentResume WHERE resume_id = ?;";
+    $query = "SELECT user_id, title, introduction, isOnLine FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
 
     //이미지 경로 불러오기
-    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ?;";
+    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_images"]= $st->fetchAll();
 
     //요일 불러오기
-    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ?;";
+    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["desired_day"]= $st->fetchAll();
 
     //지역 불러오기
-    $query = "SELECT desired_region FROM Region WHERE resume_id = ?;";
+    $query = "SELECT desired_region FROM Region WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["desired_regions"]= $st->fetchAll();
 
-    $query = "SELECT talentCategory,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ?;";
+    $query = "SELECT talentCategory,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -186,7 +195,7 @@ function getResumeData($resume_id){
 
     foreach($res["talent_have"] as &$talent){
         $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ?";
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume_id,$talent["talentCategory"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -194,14 +203,14 @@ function getResumeData($resume_id){
         unset($talent["talentCategory"]);
     }
 
-    $query = "SELECT talent_cat_id as talentCategory,desired_info FROM TalentWant WHERE resume_id = ?;";
+    $query = "SELECT talent_cat_id as talentCategory,desired_info FROM TalentWant WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_want"]= $st->fetchAll();
     foreach($res["talent_want"] as &$talent){
         $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ?";
+        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume_id,$talent["talentCategory"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -217,10 +226,19 @@ function getResumeData($resume_id){
 
 function deleteResume($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "UPDATE TalentResume set isDeleted = 1 WHERE resume_id = ? ;";
-
-    $st = $pdo->prepare($query);
-    $st->execute([$resume_id]);
+    try{
+        $pdo->beginTransaction();
+        $TABLES = ["TalentHave", "TalentWant", "TalentResume", "TalentImage","Region","DetailedWant", "DesiredDay","DetailedHave"];
+        foreach ($TABLES as $TABLE){
+            $query = "UPDATE ".$TABLE." set isDeleted = 1 WHERE resume_id = ? and isDeleted = 0 ;";
+            $st = $pdo->prepare($query);
+            $st->execute([$resume_id]);
+        }
+        $pdo->commit();
+    }catch (Exception $e){
+        echo $e."rollbakc됨";
+        $pdo->rollback();
+    }
 
     $st = null;
     $pdo = null;
@@ -281,15 +299,39 @@ function updateReview($review_id, $content, $rate){
 function createExchangeReq($sender_id,$resume_id){
     $pdo = pdoSqlConnect();
     //TODO: 여러번 신청 제한, sender != reviewer
-    $query = "INSERT INTO ExchangeRequest (sender_id,resume_id) VALUES (?,?);";
+    $query = "SELECT user_id FROM TalentResume Where resume_id = ? and isDeleted = 0";
+    $st = $pdo->prepare($query);
+    $st->execute([$resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $receiver_id = $st->fetchAll()[0]["user_id"];
+    $query = "INSERT INTO ExchangeRequest (sender_id,resume_id,receiver_id) VALUES (?,?,?);";
 
     $st = $pdo->prepare($query);
-    $st->execute([$sender_id,$resume_id]);
+    $st->execute([$sender_id,$resume_id,$receiver_id]);
 
     $st = null;
     $pdo = null;
 }
+function getReceivedExchangeReqs($user_id){
+    $pdo = pdoSqlConnect();
+    $query = "select exchange_id, sender_id,updateTime, isExchanged  from ExchangeRequest where receiver_id = ? and isExchanged= 0 ;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    foreach ($res as &$exchanges){
+        $query = "select nick_name as sender_nick, resume_id as sender_resume_id from User join TalentResume TR on User.user_id = TR.user_id where User.user_id = ? and TR.isDeleted =0;";
+        $st = $pdo->prepare($query);
+        $st->execute([$exchanges["sender_id"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $exchanges += $st->fetchAll()[0];
+    }
 
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
 
 
 function getCategoryId($category){

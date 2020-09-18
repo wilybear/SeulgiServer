@@ -27,6 +27,7 @@ try {
          * API Name : 테스트 API
          * 마지막 수정 날짜 : 20.09.02
          * 교환서 올릴시에 필수항목들이 존재하는지만 체크
+         * isset 사용 null 체크
          */
         case "createResume":
             http_response_code(200);
@@ -37,9 +38,18 @@ try {
             $res->message = "교환서 생성 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "updateResume":
+            http_response_code(200);
+            $res->result = updateResume($req->resume_id,$req->user_id,$req->title,$req->introduction,$req->talent_images,$req->isOnLine
+                ,$req->desired_day,$req->desired_regions,$req->talent_have,$req->talent_want);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
         case "getResume":
             http_response_code(200);
-            $res->result = getResumeData($vars["resumeId"]);
+            $res->result = getResumeData($vars["resume-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 불러오기 성공";
@@ -48,7 +58,7 @@ try {
 
         case "deleteResume":
             http_response_code(200);
-            $res->result = deleteResume($vars["resumeId"]);
+            $res->result = deleteResume($vars["resume-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 삭제 성공";
@@ -65,7 +75,7 @@ try {
             break;
         case "deleteReview":
             http_response_code(200);
-            $res->result = deleteReview($vars["reviewId"]);
+            $res->result = deleteReview($vars["review-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "리뷰 삭제 성공";
@@ -73,7 +83,7 @@ try {
             break;
         case "getReviews":
             http_response_code(200);
-            $res->result = getReviews($_GET["resume_id"]);
+            $res->result = getReviews($_GET["resume-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "리뷰 조회 성공";
@@ -94,6 +104,14 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 요청 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getReceivedExchangeReqs":
+            http_response_code(200);
+            $res->result = getReceivedExchangeReqs($vars["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "수신한 교환 요청 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

@@ -73,7 +73,7 @@ try {
             break;
         case "deleteUser":
             http_response_code(200);
-            $res->result = deleteUser($vars["userId"]);
+            $res->result = deleteUser($vars["user-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 삭제 성공";
@@ -81,7 +81,7 @@ try {
             break;
         case "getUserInfo":
             http_response_code(200);
-            $res->result = getUserInfo($vars["userId"]);
+            $res->result = getUserInfo($vars["user-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 조회 성공";

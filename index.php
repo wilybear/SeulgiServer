@@ -28,15 +28,16 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     /***** User ******/
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
     $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
-    $r->addRoute('DELETE', '/user/{userId}', ['IndexController', 'deleteUser']);
-    $r->addRoute('GET', '/user/{userId}', ['IndexController', 'getUserInfo']);
+    $r->addRoute('DELETE', '/user/{user-id}', ['IndexController', 'deleteUser']);
+    $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
 
 
     /***** Seulgi *****/
     //교환서
     $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
-    $r->addRoute('GET', '/seulgi/resume/{resumeId}', ['SeulgiController', 'getResume']);
-    $r->addRoute('DELETE', '/seulgi/resume/{resumeId}', ['SeulgiController', 'deleteResume']);
+    $r->addRoute('PATCH', '/seulgi/resume', ['SeulgiController', 'updateResume']);
+    $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
+    $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
 
     //후기
     $r->addRoute('POST', '/review', ['SeulgiController', 'createReview']);
@@ -44,8 +45,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('DELETE', '/review/{reviewId}', ['SeulgiController', 'deleteReview']);
     $r->addRoute('PATCH', '/review', ['SeulgiController', 'updateReview']);
 
-
     $r->addRoute('POST', '/exchange', ['SeulgiController', 'createExchangeReq']);
+    $r->addRoute('GET', '/received-exchange/{user-id}', ['SeulgiController', 'getReceivedExchangeReqs']);
+
     //TODO: 수정, 삭제(교환 요청은 제외), 조회
 
 
