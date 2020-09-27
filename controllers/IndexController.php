@@ -64,11 +64,18 @@ try {
 
         case "createUser":
             http_response_code(200);
-            $res->result = createUser($req->name,$req->email,$req->nick,$req->profileImg,$req->phone
-                ,$req->region,$req->birth,$req->SNS,$req->sex,$req->snsToken,$req->FCMToken);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "유저 생성 성공";
+            if (isset($req->name) && $_FILES['profileImg']['error'] === UPLOAD_ERR_OK) {
+                $profileImgFile = $_FILES['image']['tmp_name'];
+                $res->result = createUser($req->name, $req->email, $req->nick, $profileImgFile,getFileExtension($_FILES['image']['name']), $req->phone
+                    , $req->region, $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "유저 생성 성공";
+            }else{
+                $res->isSuccess = FALSE;
+                $res->code = 200;
+                $res->message = "image 파라미터 체크해주세요";
+            }
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "deleteUser":
@@ -88,13 +95,21 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "updateUser":
-
                 http_response_code(200);
             $res->result = updateUser($req->nick,$req->profileImg,$req->phone
                 ,$req->region,$req->user_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getImages":
+            http_response_code(200);
+            $res->result = getAllFiles();
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "이미지 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
     }

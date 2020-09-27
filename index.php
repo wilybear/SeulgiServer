@@ -8,6 +8,7 @@ require './vendor/autoload.php';
 use \Monolog\Logger as Logger;
 use Monolog\Handler\StreamHandler;
 
+define("UPLOAD_PATH",dirname(__FILE__)."/uploads/");
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
@@ -30,6 +31,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
     $r->addRoute('DELETE', '/user/{user-id}', ['IndexController', 'deleteUser']);
     $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
+    $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
 
 
     /***** Seulgi *****/
@@ -45,9 +47,15 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('DELETE', '/review/{reviewId}', ['SeulgiController', 'deleteReview']);
     $r->addRoute('PATCH', '/review', ['SeulgiController', 'updateReview']);
 
-    $r->addRoute('POST', '/exchange', ['SeulgiController', 'createExchangeReq']);
-    $r->addRoute('GET', '/received-exchange/{user-id}', ['SeulgiController', 'getReceivedExchangeReqs']);
+    //요청
+    $r->addRoute('POST', '/exchange-management/exchange', ['SeulgiController', 'createExchangeReq']);
+    $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['SeulgiController', 'getReceivedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['SeulgiController', 'getSendedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['SeulgiController', 'getExchangedReqs']);
+    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['SeulgiController', 'acceptExchangeReq']);
 
+    //화면 기능들
+    $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
     //TODO: 수정, 삭제(교환 요청은 제외), 조회
 
 

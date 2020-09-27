@@ -114,6 +114,40 @@ try {
             $res->message = "수신한 교환 요청 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "getSendedExchangeReqs":
+            http_response_code(200);
+            $res->result = getSendedExchangeReqs($vars["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "발신한 교환 요청 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "acceptExchangeReq":
+            http_response_code(200);
+            //TODO: $req->user_id 유저 체크 , 중복 xx
+            $res->result = acceptExchangeReq($req->exchange_id);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = " 교환 요청 수락 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getExchangedReqs":
+            http_response_code(200);
+            $res->result = getExchangedReqs($vars["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환한 교환들 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getResumeList":
+            http_response_code(200);
+            $res->result = getResumeList($_GET["filter"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 리스트 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
 
     }
 } catch (\Exception $e) {
