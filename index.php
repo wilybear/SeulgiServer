@@ -8,7 +8,11 @@ require './vendor/autoload.php';
 use \Monolog\Logger as Logger;
 use Monolog\Handler\StreamHandler;
 
-define("UPLOAD_PATH",dirname(__FILE__)."/uploads/");
+define("PROFILE_UPLOAD_PATH",dirname(__FILE__)."/uploads/profile/");
+define("PROFILE_RETRIVE_PATH","/uploads/profile/");
+define("RESUME_UPLOAD_PATH",dirname(__FILE__)."/uploads/resume/");
+define("RESUME_RETRIVE_PATH","/uploads/resume/");
+
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 

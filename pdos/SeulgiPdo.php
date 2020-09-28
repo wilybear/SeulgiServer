@@ -12,11 +12,28 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
         $st->execute([$user_id,$title,$introduction,$isOnLine]);
         $resume_id = $pdo->lastInsertId();
 
+
         //교환서 이미지 저장 TODO: 갯수 제한, 중복처리
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
-            $st->execute([$resume_id,$talent_image->talent_image]);
+            switch ($talent_image->talent_image{0}){
+                case '/':
+                    $extension = 'jpg';
+                    break;
+                case 'i':
+                    $extension = 'png';
+                    break;
+                default:
+                    throw new Exception("wrong extension");
+            }
+            $binary=base64_decode($talent_image->talent_image);
+            $name = round(microtime(true) * 1000) . '.' . $extension;
+            $file = fopen(RESUME_UPLOAD_PATH . $name,'wb');
+            fwrite($file,$binary);
+            fclose($file);
+            //$url = $server_ip = gethostbyname(gethostname());
+            $st->execute([$resume_id,$name]);
         }
 
         //희망 요일 저장  TODO: 중복처리
@@ -94,11 +111,27 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
             $st->execute([$resume_id]);
         }
 
-        //이미지 추가
+        //이미지 추가,TODO: 중복, 수정시 발생
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
-            $st->execute([$resume_id,$talent_image->talent_image]);
+            switch ($talent_image->talent_image{0}){
+                case '/':
+                    $extension = 'jpg';
+                    break;
+                case 'i':
+                    $extension = 'png';
+                    break;
+                default:
+                    throw new Exception("wrong extension");
+            }
+            $binary=base64_decode($talent_image->talent_image);
+            $name = round(microtime(true) * 1000) . '.' . $extension;
+            $file = fopen(RESUME_UPLOAD_PATH . $name,'wb');
+            fwrite($file,$binary);
+            fclose($file);
+            //$url = $server_ip = gethostbyname(gethostname());
+            $st->execute([$resume_id,$name]);
         }
 
         //희망 요일 수정
@@ -170,7 +203,12 @@ function getResumeData($resume_id){
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
-    $res["talent_images"]= $st->fetchAll();
+    $temp = $st->fetchAll();
+    foreach($temp as &$image){
+        $absurl = 'http://' .gethostbyname(gethostname()). RESUME_RETRIVE_PATH . $image['talent_image'];
+        $image['talent_image'] = $absurl;
+    }
+    $res["talent_images"]= $temp;
 
     //요일 불러오기
     $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and isDeleted = 0;";

@@ -64,9 +64,9 @@ try {
 
         case "createUser":
             http_response_code(200);
-            if (isset($req->name) && $_FILES['profileImg']['error'] === UPLOAD_ERR_OK) {
-                $profileImgFile = $_FILES['image']['tmp_name'];
-                $res->result = createUser($req->name, $req->email, $req->nick, $profileImgFile,getFileExtension($_FILES['image']['name']), $req->phone
+            if (isset($req->name)) {
+                //$profileImgFile = $_FILES['image']['tmp_name'];
+                $res->result = createUser($req->name, $req->email, $req->nick, $req->profileImgFile, $req->phone
                     , $req->region, $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
