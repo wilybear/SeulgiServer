@@ -1,16 +1,23 @@
 <?php
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
+require './pdos/UserPdo.php';
+require './pdos/SeulgiPdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
 use Monolog\Handler\StreamHandler;
 
+define("PROFILE_UPLOAD_PATH",dirname(__FILE__)."/uploads/profile/");
+define("PROFILE_RETRIVE_PATH","/uploads/profile/");
+define("RESUME_UPLOAD_PATH",dirname(__FILE__)."/uploads/resume/");
+define("RESUME_RETRIVE_PATH","/uploads/resume/");
+
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
 //에러출력하게 하는 코드
-//error_reporting(E_ALL); ini_set("display_errors", 1);
+error_reporting(E_ALL); ini_set("display_errors", 1);
 
 //Main Server API
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
@@ -21,7 +28,40 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/test', ['IndexController', 'testPost']);
     $r->addRoute('GET', '/jwt', ['MainController', 'validateJwt']);
     $r->addRoute('POST', '/jwt', ['MainController', 'createJwt']);
-    
+
+
+    /***** User ******/
+    $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
+    $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
+    $r->addRoute('DELETE', '/user/{user-id}', ['IndexController', 'deleteUser']);
+    $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
+    $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
+
+
+    /***** Seulgi *****/
+    //교환서
+    $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
+    $r->addRoute('PATCH', '/seulgi/resume', ['SeulgiController', 'updateResume']);
+    $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
+    $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
+
+    //후기
+    $r->addRoute('POST', '/review', ['SeulgiController', 'createReview']);
+    $r->addRoute('GET', '/review', ['SeulgiController', 'getReviews']);
+    $r->addRoute('DELETE', '/review/{reviewId}', ['SeulgiController', 'deleteReview']);
+    $r->addRoute('PATCH', '/review', ['SeulgiController', 'updateReview']);
+
+    //요청
+    $r->addRoute('POST', '/exchange-management/exchange', ['SeulgiController', 'createExchangeReq']);
+    $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['SeulgiController', 'getReceivedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['SeulgiController', 'getSendedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['SeulgiController', 'getExchangedReqs']);
+    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['SeulgiController', 'acceptExchangeReq']);
+
+    //화면 기능들
+    $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
+    //TODO: 수정, 삭제(교환 요청은 제외), 조회
+
 
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');
@@ -80,10 +120,12 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/MainController.php';
                 break;
-            /*case 'EventController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/EventController.php';
+            case 'SeulgiController':
+                $handler = $routeInfo[1][1];
+                $vars = $routeInfo[2];
+                require './controllers/SeulgiController.php';
                 break;
+                /*
             case 'ProductController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
                 require './controllers/ProductController.php';

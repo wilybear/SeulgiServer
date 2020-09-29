@@ -34,7 +34,7 @@ try {
             $res->code = 100;
             $res->message = "테스트 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
+           break;
         /*
          * API No. 0
          * API Name : 테스트 Path Variable API
@@ -59,6 +59,57 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "테스트 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "createUser":
+            http_response_code(200);
+            if (isset($req->name)) {
+                //$profileImgFile = $_FILES['image']['tmp_name'];
+                $res->result = createUser($req->name, $req->email, $req->nick, $req->profileImgFile, $req->phone
+                    , $req->region, $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "유저 생성 성공";
+            }else{
+                $res->isSuccess = FALSE;
+                $res->code = 200;
+                $res->message = "image 파라미터 체크해주세요";
+            }
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "deleteUser":
+            http_response_code(200);
+            $res->result = deleteUser($vars["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 삭제 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getUserInfo":
+            http_response_code(200);
+            $res->result = getUserInfo($vars["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "updateUser":
+                http_response_code(200);
+            $res->result = updateUser($req->nick,$req->profileImg,$req->phone
+                ,$req->region,$req->user_id);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "유저 수정 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        case "getImages":
+            http_response_code(200);
+            $res->result = getAllFiles();
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "이미지 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
     }

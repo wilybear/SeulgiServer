@@ -7,6 +7,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
+
 function getSQLErrorException($errorLogs, $e, $req)
 {
     $res = (Object)Array();
@@ -172,4 +173,10 @@ function getLogs($path)
     }
 //        fpassthru($fp);
     fclose($fp);
+}
+
+function getFileExtension($file)
+{
+    $path_parts = pathinfo($file);
+    return $path_parts['extension'];
 }

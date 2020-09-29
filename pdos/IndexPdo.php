@@ -68,7 +68,6 @@ function isValidUser($id, $pw){
 
 }
 
-
 // CREATE
 //    function addMaintenance($message){
 //        $pdo = pdoSqlConnect();
