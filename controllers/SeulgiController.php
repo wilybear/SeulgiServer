@@ -64,91 +64,69 @@ try {
             $res->message = "교환서 삭제 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-        case "createReview":
-            //중복생성 못하게
-            http_response_code(200);
-            $res->result = createReview($req->reviewer_id,$req->resume_id,$req->content,$req->rate);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "리뷰 생성 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "deleteReview":
-            http_response_code(200);
-            $res->result = deleteReview($vars["review-id"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "리뷰 삭제 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "getReviews":
-            http_response_code(200);
-            $res->result = getReviews($_GET["resume-id"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "리뷰 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "updateReview":
-            http_response_code(200);
-            $res->result = updateReview($req->resume_id,$req->content,$req->rate);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "리뷰 수정 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-            
-        case "createExchangeReq":
-            http_response_code(200);
-            $res->result = createExchangeReq($req->sender_id,$req->resume_id);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "교환 요청 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "getReceivedExchangeReqs":
-            http_response_code(200);
-            $res->result = getReceivedExchangeReqs($vars["user-id"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "수신한 교환 요청 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "getSendedExchangeReqs":
-            http_response_code(200);
-            $res->result = getSendedExchangeReqs($vars["user-id"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "발신한 교환 요청 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "acceptExchangeReq":
-            http_response_code(200);
-            //TODO: $req->user_id 유저 체크 , 중복 xx
-            $res->result = acceptExchangeReq($req->exchange_id);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = " 교환 요청 수락 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-        case "getExchangedReqs":
-            http_response_code(200);
-            $res->result = getExchangedReqs($vars["user-id"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "교환한 교환들 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
-
         case "getResumeList":
             http_response_code(200);
-            $res->result = getResumeList($_GET["filter"]);
+            $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],$_GET["isOnline"],$_GET["region"],$_GET["desired-day"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 리스트 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-
+        case "scrapResume":
+            http_response_code(200);
+            //TODO JWT 체크
+            if(!isDuplicated($req->user_id,$req->resume_id)){
+                scrapResume($req->user_id,$req->resume_id);
+                $res->message = "교환서 스크랩 성공";
+            }else{
+                deleteScrapResume($req->user_id,$req->resume_id);
+                $res->message = "교환서 스크랩 해제 성공";
+            }
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 스크랩 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getResumeBasic":
+            http_response_code(200);
+            $res->result =  getBasicResumeData($vars["resume-id"],$_GET["user-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 기본 정보 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getTalentHave":
+            http_response_code(200);
+            $res->result =  getTalentHave($vars["resume-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 가진 재능 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getTalentWant":
+            http_response_code(200);
+            $res->result =  getTalentWant($vars["resume-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 원하는 재능 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getDesiredOpt":
+            http_response_code(200);
+            $res->result =  getDesiredCondition($vars["resume-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 희망 조건 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "getResumeReviews":
+            http_response_code(200);
+            $res->result = getResumeReviews($vars["resume-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 리뷰들 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);
