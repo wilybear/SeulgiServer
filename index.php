@@ -44,6 +44,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/seulgi/resume', ['SeulgiController', 'updateResume']);
     $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
     $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
+    $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
 
     //후기
     $r->addRoute('POST', '/review', ['SeulgiController', 'createReview']);

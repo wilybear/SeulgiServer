@@ -1,0 +1,43 @@
+[33mcommit 9396716a799b4984355753e49c28a56bc7151d63[m
+Author: wilybear <samerj9712@gmail.com>
+Date:   Tue Sep 29 11:42:06 2020 +0000
+
+    test
+
+[1mdiff --git a/logs/access.log b/logs/access.log[m
+[1mindex 515843c..4d52126 100644[m
+[1m--- a/logs/access.log[m
+[1m+++ b/logs/access.log[m
+[36m@@ -1157,3 +1157,32 @@[m
+ [2020-09-28 21:52:14] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"92.119.236.72","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"} [] [][m
+ [2020-09-28 22:27:29] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"45.83.67.97","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0"} [] [][m
+ [2020-09-28 22:33:23] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"83.97.20.31","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-28 23:46:07] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"41.90.8.226","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 00:01:24] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"193.118.53.202","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 00:06:26] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"162.142.125.36","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-29 00:06:26] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"162.142.125.36","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"} [] [][m
+[32m+[m[32m[2020-09-29 00:37:30] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"HEAD","REQUEST_URI":"/","REMOTE_ADDR":"94.102.51.119","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-29 03:28:51] ACCESS_LOGS.INFO: {"GET":{"XDEBUG_SESSION_START":"phpstorm"},"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/?XDEBUG_SESSION_START=phpstorm","REMOTE_ADDR":"176.113.115.214","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 03:47:13] ACCESS_LOGS.INFO: {"GET":{"a":"fetch","content":"<php>die(@md5(HelloThinkCMF))</php>"},"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/?a=fetch&content=<php>die(@md5(HelloThinkCMF))</php>","REMOTE_ADDR":"176.113.115.214","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 06:01:03] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"192.35.168.219","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-29 06:01:03] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"192.35.168.219","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"} [] [][m
+[32m+[m[32m[2020-09-29 07:26:00] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"209.17.97.90","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; Nimbostratus-Bot/v1.3.2; http://cloudsystemnetworks.com)"} [] [][m
+[32m+[m[32m[2020-09-29 08:37:21] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"156.96.128.174","HTTP_USER_AGENT":"libwww-perl/6.47"} [] [][m
+[32m+[m[32m[2020-09-29 09:07:29] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"167.248.133.36","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-29 09:07:30] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"167.248.133.36","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"} [] [][m
+[32m+[m[32m[2020-09-29 09:27:07] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"139.162.106.181","HTTP_USER_AGENT":"HTTP Banner Detection (https://security.ipip.net)"} [] [][m
+[32m+[m[32m[2020-09-29 11:16:23] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"162.142.125.36","HTTP_USER_AGENT":null} [] [][m
+[32m+[m[32m[2020-09-29 11:16:23] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"162.142.125.36","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; CensysInspect/1.1; +https://about.censys.io/)"} [] [][m
+[32m+[m[32m[2020-09-29 11:59:03] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"192.34.114.1","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 13:44:13] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"34.72.197.69","HTTP_USER_AGENT":"Linux Mozilla 7.0"} [] [][m
+[32m+[m[32m[2020-09-29 13:52:04] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"71.6.232.9","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 14:44:22] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"192.241.238.101","HTTP_USER_AGENT":"Mozilla/5.0 zgrab/0.x"} [] [][m
+[32m+[m[32m[2020-09-29 14:54:37] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"71.6.232.2","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 16:41:47] ACCESS_LOGS.INFO: {"GET":{"XDEBUG_SESSION_START":"phpstorm"},"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/?XDEBUG_SESSION_START=phpstorm","REMOTE_ADDR":"176.113.115.214","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 16:55:00] ACCESS_LOGS.INFO: {"GET":{"a":"fetch","content":"<php>die(@md5(HelloThinkCMF))</php>"},"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/?a=fetch&content=<php>die(@md5(HelloThinkCMF))</php>","REMOTE_ADDR":"176.113.115.214","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 18:12:41] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"103.10.54.44","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 18:26:40] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"192.35.168.80","HTTP_USER_AGENT":"Mozilla/5.0 zgrab/0.x"} [] [][m
+[32m+[m[32m[2020-09-29 18:47:08] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"209.17.96.74","HTTP_USER_AGENT":"Mozilla/5.0 (compatible; Nimbostratus-Bot/v1.3.2; http://cloudsystemnetworks.com)"} [] [][m
+[32m+[m[32m[2020-09-29 18:58:53] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"189.172.139.184","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 19:28:29] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"196.52.43.116","HTTP_USER_AGENT":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3602.2 Safari/537.36"} [] [][m
+[32m+[m[32m[2020-09-29 20:11:14] ACCESS_LOGS.INFO: {"GET":[],"BODY":null,"REQUEST_METHOD":"GET","REQUEST_URI":"/","REMOTE_ADDR":"51.254.59.113","HTTP_USER_AGENT":"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"} [] [][m

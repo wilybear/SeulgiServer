@@ -142,10 +142,25 @@ try {
 
         case "getResumeList":
             http_response_code(200);
-            $res->result = getResumeList($_GET["filter"]);
+            $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],$_GET["isOnline"],$_GET["region"],$_GET["desired-day"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 리스트 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "scrapResume":
+            http_response_code(200);
+            //TODO JWT 체크
+            if(!isDuplicated($req->user_id,$req->resume_id)){
+                scrapResume($req->user_id,$req->resume_id);
+                $res->message = "교환서 스크랩 성공";
+            }else{
+                deleteScrapResume($req->user_id,$req->resume_id);
+                $res->message = "교환서 스크랩 해제 성공";
+            }
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 스크랩 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
