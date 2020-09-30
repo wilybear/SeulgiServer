@@ -3,6 +3,8 @@ require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
 require './pdos/UserPdo.php';
 require './pdos/SeulgiPdo.php';
+require './pdos/ReviewPdo.php';
+require './pdos/ExchangePdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
@@ -46,18 +48,26 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
     $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
 
+    //교환서 상세 페이지
+    $r->addRoute('GET', '/resume-info/basic/{resume-id}', ['SeulgiController', 'getResumeBasic']);
+    $r->addRoute('GET', '/resume-info/talent-have/{resume-id}', ['SeulgiController', 'getTalentHave']);
+    $r->addRoute('GET', '/resume-info/talent-want/{resume-id}', ['SeulgiController', 'getTalentWant']);
+    $r->addRoute('GET', '/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
+    $r->addRoute('GET', '/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
+
+
     //후기
-    $r->addRoute('POST', '/review', ['SeulgiController', 'createReview']);
-    $r->addRoute('GET', '/review', ['SeulgiController', 'getReviews']);
-    $r->addRoute('DELETE', '/review/{reviewId}', ['SeulgiController', 'deleteReview']);
-    $r->addRoute('PATCH', '/review', ['SeulgiController', 'updateReview']);
+    $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
+    $r->addRoute('GET', '/review', ['ReviewController', 'getReviews']);
+    $r->addRoute('DELETE', '/review/{reviewId}', ['ReviewController', 'deleteReview']);
+    $r->addRoute('PATCH', '/review', ['ReviewController', 'updateReview']);
 
     //요청
-    $r->addRoute('POST', '/exchange-management/exchange', ['SeulgiController', 'createExchangeReq']);
-    $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['SeulgiController', 'getReceivedExchangeReqs']);
-    $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['SeulgiController', 'getSendedExchangeReqs']);
-    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['SeulgiController', 'getExchangedReqs']);
-    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['SeulgiController', 'acceptExchangeReq']);
+    $r->addRoute('POST', '/exchange-management/exchange', ['ExchangeController', 'createExchangeReq']);
+    $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['ExchangeController', 'getReceivedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
+    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['ExchangeController', 'getExchangedReqs']);
+    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
@@ -125,6 +135,16 @@ switch ($routeInfo[0]) {
                 $handler = $routeInfo[1][1];
                 $vars = $routeInfo[2];
                 require './controllers/SeulgiController.php';
+                break;
+            case 'ReviewController':
+                $handler = $routeInfo[1][1];
+                $vars = $routeInfo[2];
+                require './controllers/ReviewController.php';
+                break;
+            case 'ExchangeController':
+                $handler = $routeInfo[1][1];
+                $vars = $routeInfo[2];
+                require './controllers/ExchangeController.php';
                 break;
                 /*
             case 'ProductController':
