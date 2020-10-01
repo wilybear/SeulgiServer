@@ -3,8 +3,8 @@
 function createUser($name,$email,$nick,$profileImgFile,$phone
                 ,$region,$birth,$SNS,$sex,$snsToken,$FCMToken)
 {
+    $pdo = pdoSqlConnect();
     try {
-        $pdo = pdoSqlConnect();
         $pdo->beginTransaction();
         $query = "INSERT INTO User (user_name,user_email,nick_name,phone
 ,region, birth, SNS, sex, snsToken,FCMToken) VALUES (?,?,?,?,?,?,?,?,?,?);";
@@ -13,37 +13,38 @@ function createUser($name,$email,$nick,$profileImgFile,$phone
             , $region, $birth, $SNS, $sex, $snsToken, $FCMToken]);
         $user_id = $pdo->lastInsertId();
 
-        switch ($profileImgFile{0}){
-            case '/':
-                $extension = 'jpg';
-                break;
-            case 'i':
-                $extension = 'png';
-                break;
-            default:
-                throw new Exception("wrong extension");
+        if($profileImgFile != null) {
+            switch ($profileImgFile{0}) {
+                case '/':
+                    $extension = 'jpg';
+                    break;
+                case 'i':
+                    $extension = 'png';
+                    break;
+                default:
+                    throw new Exception("wrong extension");
+            }
+            $binary = base64_decode($profileImgFile);
+            $name = round(microtime(true) * 1000) . '.' . $extension;
+            // $filedest = UPLOAD_PATH . $name;
+            //move_uploaded_file($file, $filedest);
+            $file = fopen(PROFILE_UPLOAD_PATH . $name, 'wb');
+            fwrite($file, $binary);
+            fclose($file);
+            //$url = $server_ip = gethostbyname(gethostname());
+            $query = "UPDATE User SET profile_img = ? WHERE user_id = ?";
+            $st = $pdo->prepare($query);
+            $st->execute([$name, $user_id]);
         }
-        $binary=base64_decode($profileImgFile);
-        $name = round(microtime(true) * 1000) . '.' . $extension;
-        // $filedest = UPLOAD_PATH . $name;
-        //move_uploaded_file($file, $filedest);
-        $file = fopen(PROFILE_UPLOAD_PATH . $name,'wb');
-        fwrite($file,$binary);
-        fclose($file);
-        //$url = $server_ip = gethostbyname(gethostname());
-        $query = "UPDATE User SET profile_img = ? WHERE user_id = ?";
-        $st = $pdo->prepare($query);
-        $st->execute([$name,$user_id]);
-
         $pdo->commit();
     }catch (Exception $e){
-        echo $e."image upload error";
+        echo $e."error on create user";
         $pdo->rollback();
         return false;
     }
     $st = null;
     $pdo = null;
-
+    return true;
 }
 
 function getUserInfo($user_id){
@@ -57,9 +58,10 @@ function getUserInfo($user_id){
     $res = $st->fetchAll();
 
     foreach($res as &$image){
-        print_r(gethostname());
-        $absurl = 'http://' .gethostbyname(gethostname()). PROFILE_RETRIVE_PATH . $image['profile_img'];
-        $image['profile_img'] = $absurl;
+        if($image['profile_img']!=null) {
+            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
+            $image['profile_img'] = $absurl;
+        }
     }
     $st = null;
     $pdo = null;

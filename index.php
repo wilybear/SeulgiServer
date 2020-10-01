@@ -2,6 +2,7 @@
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
 require './pdos/UserPdo.php';
+require './pdos/PostPdo.php';
 require './pdos/SeulgiPdo.php';
 require './pdos/ReviewPdo.php';
 require './pdos/ExchangePdo.php';
@@ -14,6 +15,8 @@ define("PROFILE_UPLOAD_PATH",dirname(__FILE__)."/uploads/profile/");
 define("PROFILE_RETRIVE_PATH","/uploads/profile/");
 define("RESUME_UPLOAD_PATH",dirname(__FILE__)."/uploads/resume/");
 define("RESUME_RETRIVE_PATH","/uploads/resume/");
+define("POST_UPLOAD_PATH",dirname(__FILE__)."/uploads/community/");
+define("POST_RETRIVE_PATH","/uploads/community/");
 
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
@@ -55,7 +58,6 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
     $r->addRoute('GET', '/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
 
-
     //후기
     $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
     $r->addRoute('GET', '/review', ['ReviewController', 'getReviews']);
@@ -72,6 +74,18 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
     //TODO: 수정, 삭제(교환 요청은 제외), 조회
+
+    //피드 기능
+    $r->addRoute('POST', '/post', ['PostController', 'createPost']);
+    $r->addRoute('PATCH', '/post', ['PostController', 'updatePost']);
+    $r->addRoute('GET', '/post/{post-id}', ['PostController', 'getPost']);
+    $r->addRoute('GET', '/post-list', ['PostController', 'getPostList']);
+    $r->addRoute('DELETE', '/post', ['PostController', 'deletePost']);
+    $r->addRoute('POST', '/post/like', ['PostController', 'likePost']);
+    $r->addRoute('POST', '/post/comment', ['PostController', 'createComment']);
+    $r->addRoute('PATCH', '/post/comment', ['PostController', 'updateComment']);
+    $r->addRoute('DELETE', '/post/comment', ['PostController', 'deleteComment']);
+
 
 
 
@@ -145,6 +159,11 @@ switch ($routeInfo[0]) {
                 $handler = $routeInfo[1][1];
                 $vars = $routeInfo[2];
                 require './controllers/ExchangeController.php';
+                break;
+            case 'PostController':
+                $handler = $routeInfo[1][1];
+                $vars = $routeInfo[2];
+                require './controllers/PostController.php';
                 break;
                 /*
             case 'ProductController':
