@@ -112,6 +112,21 @@ try {
             $res->message = "이미지 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+        case "reportContent":
+            http_response_code(200);
+            //TODO JWT 체크
+            if(!checkIfExist("Report",["user_id","id","report_type"],[$req->user_id,$req->id,$req->report_type])){
+                reportContent($req->user_id,$req->id,$req->report_type);
+                $res->message = "신고 성공";
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+            }else{
+                $res->message = "이미 신고 했습니다";
+                $res->isSuccess = FALSE;
+                $res->code = 100;
+            }
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

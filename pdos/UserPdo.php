@@ -78,7 +78,6 @@ function updateUser($nick,$profileImg,$phone
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     if($res[0]["profile_img"] != $profileImg){
-        echo "profile img 바뀜";
         if($res[0]["profile_img"] != null) {
             unlink(PROFILE_UPLOAD_PATH . $res[0]["profile_img"]);
         }
@@ -95,8 +94,6 @@ function updateUser($nick,$profileImg,$phone
             }
             $binary = base64_decode($profileImg);
             $name = round(microtime(true) * 1000) . '.' . $extension;
-            // $filedest = UPLOAD_PATH . $name;
-            //move_uploaded_file($file, $filedest);
             $file = fopen(PROFILE_UPLOAD_PATH . $name, 'wb');
             fwrite($file, $binary);
             fclose($file);
@@ -128,6 +125,31 @@ function deleteUser($user_id){
     $pdo = null;
 }
 
+function reportContent($user_id,$id,$type){
+    //type마다 실제 있는지 확인
+    switch ($type){
+        case 'comment':
+            break;
+        case 'post':
+            break;
+        case 'resume':
+            break;
+        case 'user':
+            break;
+        default:
+            return false;
+    }
+    $pdo = pdoSqlConnect();
+    //TODO: report 이미 한 사람은 안됨.
+    $query = "INSERT INTO Report (id,user_id,report_type) VALUES (?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$id,$user_id,$type]);
+
+    $st = null;
+    $pdo = null;
+}
+
 
 //SAMPLE
 function getAllFiles()
@@ -144,3 +166,4 @@ function getAllFiles()
 
     return $res;
 }
+

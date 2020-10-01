@@ -180,3 +180,21 @@ function getFileExtension($file)
     $path_parts = pathinfo($file);
     return $path_parts['extension'];
 }
+
+function checkIfExist($table, $col_args,$args){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM ".$table." WHERE ";
+    foreach($col_args as $col){
+        $query .= $col."=? AND ";
+    }
+    $query = substr($query,0,-4);
+    $query .=") AS exist;";
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute($args);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
+}

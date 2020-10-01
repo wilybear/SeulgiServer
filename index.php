@@ -70,6 +70,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['ExchangeController', 'getExchangedReqs']);
     $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
+    $r->addRoute('GET', '/exchange-management/exchange', ['ExchangeController', 'ExchangeInfo']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
@@ -86,7 +87,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/post/comment', ['PostController', 'updateComment']);
     $r->addRoute('DELETE', '/post/comment', ['PostController', 'deleteComment']);
 
-
+    //신고 기능
+    $r->addRoute('POST', '/report', ['IndexController', 'reportContent']);
 
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');

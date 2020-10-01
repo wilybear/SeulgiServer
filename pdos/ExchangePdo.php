@@ -96,3 +96,56 @@ function getExchangedReqs($user_id){
     return $res;
 }
 
+function getExchangeInfo($user_id,$op_resume_id){
+    $pdo = pdoSqlConnect();
+    //나의 정보 먼저
+    $query = "select resume_id from TalentResume join User using(user_id) where user_id = ? and TalentResume.isDeleted = 0 and User.user_id;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $my_resume_id = $st->fetchAll()[0]["resume_id"];
+
+    $query = "SELECT talentCategory FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $st = $pdo->prepare($query);
+    $st->execute([$my_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["my"]["talent_have"]= $st->fetchAll();
+    foreach($res["my"]["talent_have"] as &$talent){
+        $talent["category"]=getCategoryName($talent["talentCategory"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $st = $pdo->prepare($query);
+        $st->execute([$my_resume_id,$talent["talentCategory"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $talent["detailed_talent"] = $st->fetchAll();
+        unset($talent["talentCategory"]);
+    }
+    
+    //상대방 재능
+    $query = "select nick_name from TalentResume join User using(user_id) where resume_id = ? and TalentResume.isDeleted = 0 and User.user_id;";
+    $st = $pdo->prepare($query);
+    $st->execute([$op_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["opponent"]["nick"] = $st->fetchAll()[0]["nick_name"];
+
+
+    $query = "SELECT talentCategory FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $st = $pdo->prepare($query);
+    $st->execute([$op_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["opponent"]["talent_have"]= $st->fetchAll();
+    foreach($res["opponent"]["talent_have"] as &$talent){
+        $talent["category"]=getCategoryName($talent["talentCategory"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $st = $pdo->prepare($query);
+        $st->execute([$op_resume_id,$talent["talentCategory"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $talent["detailed_talent"] = $st->fetchAll();
+        unset($talent["talentCategory"]);
+    }
+
+
+
+    $st = null;
+    $pdo = null;
+    return $res;
+}

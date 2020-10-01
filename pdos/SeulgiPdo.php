@@ -215,7 +215,7 @@ function getBasicResumeData($resume_id,$user_id){
     $res["talent_images"]= $temp;
 
     if(isset($user_id)) {
-        $resume["isScrapped"] = isDuplicated($user_id, $resume_id);
+        $resume["isScrapped"] = checkIfExist("ResumeScrap",["user_id","resume_id"],[$user_id, $resume_id]);
     }else{
         $resume["isScrapped"] = false;
     }
@@ -472,19 +472,6 @@ function deleteScrapResume($user_id, $resume_id){
     $st = null;
     $pdo = null;
 }
-function isDuplicated($user_id, $resume_id){
-    $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM ResumeScrap WHERE user_id=? AND resume_id = ?) AS exist;";
-
-    $st = $pdo->prepare($query);
-    //    $st->execute([$param,$param]);
-    $st->execute([$user_id,$resume_id ]);
-    $st->setFetchMode(PDO::FETCH_ASSOC);
-    $res = $st->fetchAll();
-
-    $st=null;$pdo = null;
-    return intval($res[0]["exist"]);
-}
 
 function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$region,$desired_day){
     $pdo = pdoSqlConnect();
@@ -565,11 +552,17 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
     $query = substr($query,0,-4);
 
     switch ($filter) {
+        //최신순
         case 0:
             $query .= " order by updateTime DESC limit 5;";
             break;
+            //후기순
         case 1:
             $query .= " order by rate limit 5;";
+            break;
+            //조회순
+        case 2:
+            $query .= " order by hit limit 5;";
             break;
         default:
             $query .= " order by updateTime DESC limit 5;";
@@ -619,7 +612,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
         $resume["talentImage"] = $st->fetchAll()[0];
 
         if(isset($user_id)) {
-            $resume["isScrapped"] = isDuplicated($user_id, $resume["resume_id"]);
+            $resume["isScrapped"] = checkIfExist("ResumeScrap",["user_id","resume_id"],[$user_id, $resume["resume_id"]]);
         }else{
             $resume["isScrapped"] = false;
         }

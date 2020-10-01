@@ -71,7 +71,14 @@ try {
             $res->message = "교환한 교환들 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-
+        case "ExchangeInfo":
+            http_response_code(200);
+            $res->result = getExchangeInfo($_GET["user-id"],$_GET["op-resume-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환 정보 조회";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
 
     }
 } catch (\Exception $e) {

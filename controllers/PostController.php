@@ -67,7 +67,7 @@ try {
             break;
         case "likePost":
             http_response_code(200);
-            if(!isLiked($req->user_id,$req->post_id)) {
+            if(!checkIfExist("PostLike",["user_id","post_id"],[$req->user_id,$req->post_id])) {
                 $res->result = likePost($req->user_id, $req->post_id);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
