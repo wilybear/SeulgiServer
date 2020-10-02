@@ -70,7 +70,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['ExchangeController', 'getExchangedReqs']);
     $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
-    $r->addRoute('GET', '/exchange-management/exchange', ['ExchangeController', 'ExchangeInfo']);
+    $r->addRoute('GET', '/exchange-management/exchange-result', ['ExchangeController', 'ExchangeInfo']);
+    $r->addRoute('GET', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'getExchangeReq']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
