@@ -75,16 +75,19 @@ try {
         case "scrapResume":
             http_response_code(200);
             //TODO JWT 체크
-            if(!isDuplicated($req->user_id,$req->resume_id)){
+            if(!checkIfExist("ResumeScrap",["user_id","resume_id"],[$req->user_id,$req->resume_id])){
                 scrapResume($req->user_id,$req->resume_id);
                 $res->message = "교환서 스크랩 성공";
+                $res->isSuccess = TRUE;
+                $res->code = 100;
             }else{
                 deleteScrapResume($req->user_id,$req->resume_id);
                 $res->message = "교환서 스크랩 해제 성공";
+                $res->isSuccess = TRUE;
+                $res->code = 100;
             }
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "교환서 스크랩 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "getResumeBasic":

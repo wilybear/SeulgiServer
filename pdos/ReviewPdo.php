@@ -25,7 +25,7 @@ function deleteReview($review_id){
 //해당 이력서의 모든 review들을 가지고옴
 function getReviews($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "Select nick_name as review_nick, profile_img as review_profile_imgm,rate, content, Review.createTime
+    $query = "Select nick_name as reviewer_nick, profile_img,rate, content, Review.createTime
 from Review join User on Review.reviewer_id = User.user_id
 where resume_id = ? and Review.isDeleted = 0;";
 
@@ -34,6 +34,12 @@ where resume_id = ? and Review.isDeleted = 0;";
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
+    foreach($res as &$image){
+        if($image['profile_img']!=null) {
+            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
+            $image['profile_img'] = $absurl;
+        }
+    }
     $st = null;
     $pdo = null;
 

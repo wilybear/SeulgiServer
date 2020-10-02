@@ -3,8 +3,8 @@
 function createUser($name,$email,$nick,$profileImgFile,$phone
                 ,$region,$birth,$SNS,$sex,$snsToken,$FCMToken)
 {
+    $pdo = pdoSqlConnect();
     try {
-        $pdo = pdoSqlConnect();
         $pdo->beginTransaction();
         $query = "INSERT INTO User (user_name,user_email,nick_name,phone
 ,region, birth, SNS, sex, snsToken,FCMToken) VALUES (?,?,?,?,?,?,?,?,?,?);";
@@ -13,37 +13,38 @@ function createUser($name,$email,$nick,$profileImgFile,$phone
             , $region, $birth, $SNS, $sex, $snsToken, $FCMToken]);
         $user_id = $pdo->lastInsertId();
 
-        switch ($profileImgFile{0}){
-            case '/':
-                $extension = 'jpg';
-                break;
-            case 'i':
-                $extension = 'png';
-                break;
-            default:
-                throw new Exception("wrong extension");
+        if($profileImgFile != null) {
+            switch ($profileImgFile{0}) {
+                case '/':
+                    $extension = 'jpg';
+                    break;
+                case 'i':
+                    $extension = 'png';
+                    break;
+                default:
+                    throw new Exception("wrong extension");
+            }
+            $binary = base64_decode($profileImgFile);
+            $name = round(microtime(true) * 1000) . '.' . $extension;
+            // $filedest = UPLOAD_PATH . $name;
+            //move_uploaded_file($file, $filedest);
+            $file = fopen(PROFILE_UPLOAD_PATH . $name, 'wb');
+            fwrite($file, $binary);
+            fclose($file);
+            //$url = $server_ip = gethostbyname(gethostname());
+            $query = "UPDATE User SET profile_img = ? WHERE user_id = ?";
+            $st = $pdo->prepare($query);
+            $st->execute([$name, $user_id]);
         }
-        $binary=base64_decode($profileImgFile);
-        $name = round(microtime(true) * 1000) . '.' . $extension;
-        // $filedest = UPLOAD_PATH . $name;
-        //move_uploaded_file($file, $filedest);
-        $file = fopen(PROFILE_UPLOAD_PATH . $name,'wb');
-        fwrite($file,$binary);
-        fclose($file);
-        //$url = $server_ip = gethostbyname(gethostname());
-        $query = "UPDATE User SET profile_img = ? WHERE user_id = ?";
-        $st = $pdo->prepare($query);
-        $st->execute([$name,$user_id]);
-
         $pdo->commit();
     }catch (Exception $e){
-        echo $e."image upload error";
+        echo $e."error on create user";
         $pdo->rollback();
         return false;
     }
     $st = null;
     $pdo = null;
-
+    return true;
 }
 
 function getUserInfo($user_id){
@@ -57,9 +58,10 @@ function getUserInfo($user_id){
     $res = $st->fetchAll();
 
     foreach($res as &$image){
-        print_r(gethostname());
-        $absurl = 'http://' .gethostbyname(gethostname()). PROFILE_RETRIVE_PATH . $image['profile_img'];
-        $image['profile_img'] = $absurl;
+        if($image['profile_img']!=null) {
+            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
+            $image['profile_img'] = $absurl;
+        }
     }
     $st = null;
     $pdo = null;
@@ -76,7 +78,6 @@ function updateUser($nick,$profileImg,$phone
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     if($res[0]["profile_img"] != $profileImg){
-        echo "profile img 바뀜";
         if($res[0]["profile_img"] != null) {
             unlink(PROFILE_UPLOAD_PATH . $res[0]["profile_img"]);
         }
@@ -93,8 +94,6 @@ function updateUser($nick,$profileImg,$phone
             }
             $binary = base64_decode($profileImg);
             $name = round(microtime(true) * 1000) . '.' . $extension;
-            // $filedest = UPLOAD_PATH . $name;
-            //move_uploaded_file($file, $filedest);
             $file = fopen(PROFILE_UPLOAD_PATH . $name, 'wb');
             fwrite($file, $binary);
             fclose($file);
@@ -126,6 +125,31 @@ function deleteUser($user_id){
     $pdo = null;
 }
 
+function reportContent($user_id,$id,$type){
+    //type마다 실제 있는지 확인
+    switch ($type){
+        case 'comment':
+            break;
+        case 'post':
+            break;
+        case 'resume':
+            break;
+        case 'user':
+            break;
+        default:
+            return false;
+    }
+    $pdo = pdoSqlConnect();
+    //TODO: report 이미 한 사람은 안됨.
+    $query = "INSERT INTO Report (id,user_id,report_type) VALUES (?,?,?);";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$id,$user_id,$type]);
+
+    $st = null;
+    $pdo = null;
+}
+
 
 //SAMPLE
 function getAllFiles()
@@ -142,3 +166,4 @@ function getAllFiles()
 
     return $res;
 }
+

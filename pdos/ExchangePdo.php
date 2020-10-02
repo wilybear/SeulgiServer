@@ -82,17 +82,110 @@ function getExchangedReqs($user_id){
     foreach ($res as &$exchanges){
         if($exchanges["sender_id"]==$user_id){
             $opponent_id = $exchanges["receiver_id"];
+            $isSender = true;
         }else{
             $opponent_id = $exchanges["sender_id"];
+            $isSender = false;
         }
-        $query = "select nick_name as opponent_nick, resume_id as opponent_resume_id, phone from User join TalentResume TR on User.user_id = TR.user_id where User.user_id = ? and TR.isDeleted =0;";
+        $query = "select nick_name as opponent_nick, resume_id as opponent_resume_id from User join TalentResume TR on User.user_id = TR.user_id where User.user_id = ? and TR.isDeleted =0;";
         $st = $pdo->prepare($query);
         $st->execute([$opponent_id]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $exchanges += $st->fetchAll()[0];
+        $exchanges["isSender"]= $isSender;
     }
     $st = null;
     $pdo = null;
     return $res;
 }
 
+function getExchangeReq($user_id,$exchange_id){
+    $pdo = pdoSqlConnect();
+    //해당 교환성에서 보낸 사람인지 받은 사람인지 체크
+
+    $query = "select exchange_id,sender_id ,resume_id,receiver_id,updateTime, isExchanged from ExchangeRequest where exchange_id = ? and isDeleted = 0;";
+    $st = $pdo->prepare($query);
+    $st->execute([$exchange_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    if($res[0]["sender_id"]==$user_id){
+        //사용자가 보낸 요청일때!
+        $query = "select profile_img, nick_name as op_nick, if(isExchanged=1,phone,null) as op_phone from User join ExchangeRequest ER on User.user_id = ER.receiver_id where user_id = ? and User.isDeleted = 0;";
+        $st = $pdo->prepare($query);
+        $st->execute([$res[0]["receiver_id"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+    }else{
+        //받은 요청일떄
+        $query = "select profile_img, nick_name as op_nick, if(isExchanged=1,phone,null) as op_phone from User join ExchangeRequest ER on User.user_id = ER.receiver_id where user_id = ? and User.isDeleted = 0;";
+        $st = $pdo->prepare($query);
+        $st->execute([$res[0]["sender_id"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+    }
+
+    $res[0]["opponent"] = $st->fetchAll();
+    foreach ($res[0]["opponent"] as &$op) {
+        if ($op['profile_img'] != null) {
+            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $op['profile_img'];
+            $op['profile_img'] = $absurl;
+        }
+    }
+
+    $st = null;
+    $pdo = null;
+    return $res;
+
+}
+
+function getExchangeInfo($user_id,$op_resume_id){
+    $pdo = pdoSqlConnect();
+    //나의 정보 먼저
+    $query = "select resume_id from TalentResume join User using(user_id) where user_id = ? and TalentResume.isDeleted = 0 and User.user_id;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $my_resume_id = $st->fetchAll()[0]["resume_id"];
+
+    $query = "SELECT talentCategory FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $st = $pdo->prepare($query);
+    $st->execute([$my_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["my"]["talent_have"]= $st->fetchAll();
+    foreach($res["my"]["talent_have"] as &$talent){
+        $talent["category"]=getCategoryName($talent["talentCategory"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $st = $pdo->prepare($query);
+        $st->execute([$my_resume_id,$talent["talentCategory"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $talent["detailed_talent"] = $st->fetchAll();
+        unset($talent["talentCategory"]);
+    }
+    
+    //상대방 재능
+    $query = "select nick_name from TalentResume join User using(user_id) where resume_id = ? and TalentResume.isDeleted = 0 and User.user_id;";
+    $st = $pdo->prepare($query);
+    $st->execute([$op_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["opponent"]["nick"] = $st->fetchAll()[0]["nick_name"];
+
+
+    $query = "SELECT talentCategory FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $st = $pdo->prepare($query);
+    $st->execute([$op_resume_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res["opponent"]["talent_have"]= $st->fetchAll();
+    foreach($res["opponent"]["talent_have"] as &$talent){
+        $talent["category"]=getCategoryName($talent["talentCategory"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $st = $pdo->prepare($query);
+        $st->execute([$op_resume_id,$talent["talentCategory"]]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $talent["detailed_talent"] = $st->fetchAll();
+        unset($talent["talentCategory"]);
+    }
+
+
+
+    $st = null;
+    $pdo = null;
+    return $res;
+}
