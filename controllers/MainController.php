@@ -44,7 +44,9 @@ try {
             // jwt 유효성 검사
             http_response_code(200);
 
-            if(!isValidUser($req->id, $req->pw)){
+            //여기서 sns토큰도 받아야함
+            //$req->SnSToken
+            if(!isValidUser($req->id)){
                 $res->isSuccess = FALSE;
                 $res->code = 100;
                 $res->message = "유효하지 않은 아이디 입니다";
@@ -53,7 +55,7 @@ try {
             }
 
             //페이로드에 맞게 다시 설정 요함
-            $jwt = getJWToken($req->id, $req->pw, JWT_SECRET_KEY);
+            $jwt = getJWToken($req->id, JWT_SECRET_KEY);
             $res->result->jwt = $jwt;
             $res->isSuccess = TRUE;
             $res->code = 100;
