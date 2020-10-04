@@ -38,7 +38,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     /***** User ******/
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
     $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
-    $r->addRoute('DELETE', '/user/{user-id}', ['IndexController', 'deleteUser']);
+    $r->addRoute('DELETE', '/user', ['IndexController', 'deleteUser']);
     $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
     $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
 

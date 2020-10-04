@@ -23,10 +23,26 @@ function isValidHeader($jwt, $key)
     try {
         $data = getDataByJWToken($jwt, $key);
         //로그인 함수 직접 구현 요함
-        return isValidUser($data->id, $data->pw);
+        return isValidUser($data->id);
     } catch (\Exception $e) {
         return false;
     }
+}
+
+function checkImageExt($image){
+    if($image != null) {
+        switch ($image{0}) {
+            case '/':
+                $extension = 'jpg';
+                break;
+            case 'i':
+                $extension = 'png';
+                break;
+            default:
+                return false;
+        }
+    }
+    return true;
 }
 
 function sendFcm($fcmToken, $data, $key, $deviceType)
@@ -75,12 +91,11 @@ function getTodayByTimeStamp()
     return date("Y-m-d H:i:s");
 }
 
-function getJWToken($id, $pw, $secretKey)
+function getJWToken($id, $secretKey)
 {
     $data = array(
         'date' => (string)getTodayByTimeStamp(),
-        'id' => (string)$id,
-        'pw' => (string)$pw
+        'id' => (string)$id
     );
 
 //    echo json_encode($data);
@@ -188,6 +203,13 @@ function checkIfExist($table, $col_args,$args){
         $query .= $col."=? AND ";
     }
     $query = substr($query,0,-4);
+    $tables = ["Comment","DetailWant","DetailHave","ExchangeRequest","Post","Region","DesiredDay","Review","TalentHave","TalentWant","User","TalentResume","TalentImage"];
+    foreach ($tables as $_table){
+        if($_table == $table) {
+            $query .= "isDeleted = 0 ";
+            break;
+        }
+    }
     $query .=") AS exist;";
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
@@ -197,4 +219,37 @@ function checkIfExist($table, $col_args,$args){
 
     $st=null;$pdo = null;
     return intval($res[0]["exist"]);
+}
+
+function checkIfIsDeleted($table, $col_args,$args){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM ".$table." WHERE ";
+    foreach($col_args as $col){
+        $query .= $col."=? AND ";
+    }
+    $query = substr($query,0,-4);
+    //if($table =="")
+    $query .="AND isDeleted = 1) AS exist;";
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute($args);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
+}
+
+function successRes($res,$message){
+    $res->isSuccess = TRUE;
+    $res->code = 100;
+    $res->message = $message;
+    echo json_encode($res, JSON_NUMERIC_CHECK);
+}
+
+function failRes($res,$message,$code){
+    $res->isSuccess = FALSE;
+    $res->code = $code;
+    $res->message = $message;
+    echo json_encode($res, JSON_NUMERIC_CHECK);
 }

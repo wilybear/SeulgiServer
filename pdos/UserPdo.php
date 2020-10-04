@@ -50,7 +50,7 @@ function createUser($name,$email,$nick,$profileImgFile,$phone
 function getUserInfo($user_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT user_name,user_email,nick_name,profile_img,phone
-,region, birth, sex FROM User WHERE user_id= ? ;";
+,region, birth, sex FROM User WHERE user_id= ? and isDeleted = 0 ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
@@ -72,7 +72,7 @@ function updateUser($nick,$profileImg,$phone
     ,$region,$user_id){
     $pdo = pdoSqlConnect();
     //user 확인 필요, img update 처리
-    $query = "SELECT profile_img FROM User WHERE user_id = ?";
+    $query = "SELECT profile_img FROM User WHERE user_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -102,7 +102,7 @@ function updateUser($nick,$profileImg,$phone
     }
 
     $query = "UPDATE User SET nick_name = ?,profile_img = ?,phone = ?
-,region = ? WHERE user_id= ?";
+,region = ? WHERE user_id= ? and isDeleted = 0";
 
 
     $st = $pdo->prepare($query);
@@ -116,8 +116,8 @@ function updateUser($nick,$profileImg,$phone
 function deleteUser($user_id){
     $pdo = pdoSqlConnect();
     //user 확인
-    $query = "UPDATE User SET isDeleted = 1 WHERE user_id= ?";
-
+    $query = "UPDATE User SET isDeleted = 1 WHERE user_id= ? and isDeleted = 0";
+    echo $user_id;
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
 
@@ -165,5 +165,27 @@ function getAllFiles()
     }
 
     return $res;
+}
+
+function getUserNoFromHeader($jwt, $key)
+{
+    try {
+        $data = getDataByJWToken($jwt, $key);
+        $pdo = pdoSqlConnect();
+        $query = "SELECT user_id FROM User WHERE user_id = ? and isDeleted = 0";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$data->id]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $st = null;
+        $pdo = null;
+
+        return $res[0]["user_id"];
+
+    } catch (\Exception $e) {
+        return false;
+    }
 }
 
