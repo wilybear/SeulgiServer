@@ -1,15 +1,15 @@
 <?php
 
 function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
-                    $talent_have,$talent_want)
+                    $talent_have,$talent_want,$wish)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
         //교환서 기본 사항 저장 TODO: 중복처리
-        $query = "INSERT INTO TalentResume (user_id,title, introduction, isOnLine) VALUES (?,?,?,?);";
+        $query = "INSERT INTO TalentResume (user_id,title, introduction, isOnLine,wish) VALUES (?,?,?,?,?);";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id,$title,$introduction,$isOnLine]);
+        $st->execute([$user_id,$title,$introduction,$isOnLine,$wish]);
         $resume_id = $pdo->lastInsertId();
 
 
@@ -92,7 +92,7 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
 
 
 function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
-                      $talent_have,$talent_want)
+                      $talent_have,$talent_want, $wish)
 {
     $pdo = pdoSqlConnect();
     try {
@@ -100,9 +100,9 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
         //교환서 기본 사항 수정
 
         //record가 여러개인 테이블들에는 기존 데이터를 삭제하고 새로운 데이터를 넣어줌
-        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ? WHERE resume_id = ? and isDeleted = 0";
+        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ?, wish = ? WHERE resume_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id,$title,$introduction,$isOnLine,$resume_id]);
+        $st->execute([$user_id,$title,$introduction,$isOnLine,$wish,$resume_id]);
 
         $TABLES = ["TalentHave", "TalentWant","Region","DetailedWant","DetailedHave","TalentImage"];
         foreach ($TABLES as $TABLE){
@@ -276,13 +276,13 @@ function getTalentWant($resume_id){
 function getDesiredCondition($resume_id){
 
     $pdo = pdoSqlConnect();
-    //요일 불러오기
-    $query = "SELECT isOnLine FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    //희망 사항, 온라인 여부 불러오기
+    $query = "SELECT isOnLine, wish FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
-
+//요일 불러오기
     $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
@@ -322,7 +322,7 @@ function getResumeData($resume_id){
     $pdo = pdoSqlConnect();
 
     //이력서 기본정보 불러오기
-    $query = "SELECT user_id, title, introduction, isOnLine FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT user_id, title, introduction, isOnLine, wish FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -473,7 +473,7 @@ function deleteScrapResume($user_id, $resume_id){
     $pdo = null;
 }
 
-function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$region,$desired_day){
+function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$region,$desired_day,$lastIdx){
     $pdo = pdoSqlConnect();
     $query = "select TR.resume_id, title, TR.createTime, hit ,rate from TalentResume as TR ";
 
@@ -554,20 +554,19 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
     switch ($filter) {
         //최신순
         case 0:
-            $query .= " order by updateTime DESC limit 5;";
+            $query .= " order by updateTime DESC limit ".$lastIdx.",10;";
             break;
             //후기순
         case 1:
-            $query .= " order by rate limit 5;";
+            $query .= " order by rate limit ".$lastIdx.",10;";
             break;
             //조회순
         case 2:
-            $query .= " order by hit limit 5;";
+            $query .= " order by hit limit ".$lastIdx.",10;";
             break;
         default:
-            $query .= " order by updateTime DESC limit 5;";
+            $query .= " order by updateTime DESC limit ".$lastIdx.",10;";
     }
-    echo $query.'\n';
     $st = $pdo->prepare($query);
     $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -629,6 +628,18 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
     $pdo = null;
 
     return $res;
+}
+
+function checkResumePermission($resume_id,$user_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM TalentResume WHERE resume_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$resume_id,$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
 }
 
 

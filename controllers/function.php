@@ -206,13 +206,12 @@ function checkIfExist($table, $col_args,$args){
     $tables = ["Comment","DetailWant","DetailHave","ExchangeRequest","Post","Region","DesiredDay","Review","TalentHave","TalentWant","User","TalentResume","TalentImage"];
     foreach ($tables as $_table){
         if($_table == $table) {
-            $query .= "isDeleted = 0 ";
+            $query .= "AND isDeleted = 0 ";
             break;
         }
     }
     $query .=") AS exist;";
     $st = $pdo->prepare($query);
-    //    $st->execute([$param,$param]);
     $st->execute($args);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();

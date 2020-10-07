@@ -60,18 +60,19 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     //후기
     $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
-    $r->addRoute('GET', '/review', ['ReviewController', 'getReviews']);
-    $r->addRoute('DELETE', '/review/{reviewId}', ['ReviewController', 'deleteReview']);
+    $r->addRoute('GET', '/review/{review-id}', ['ReviewController', 'getReviews']);
+    $r->addRoute('DELETE', '/review/{review-id}', ['ReviewController', 'deleteReview']);
     $r->addRoute('PATCH', '/review', ['ReviewController', 'updateReview']);
 
     //요청
     $r->addRoute('POST', '/exchange-management/exchange', ['ExchangeController', 'createExchangeReq']);
     $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['ExchangeController', 'getReceivedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
-    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['ExchangeController', 'getExchangedReqs']);
+    $r->addRoute('GET', '/exchange-management/exchanged-exchanges', ['ExchangeController', 'getExchangedReqs']);
     $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
     $r->addRoute('GET', '/exchange-management/exchange-result', ['ExchangeController', 'ExchangeInfo']);
     $r->addRoute('GET', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'getExchangeReq']);
+    $r->addRoute('DELETE', '/exchange-management/exchange', ['ExchangeController', 'deleteExchangeReq']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
@@ -168,27 +169,27 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/PostController.php';
                 break;
-                /*
-            case 'ProductController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ProductController.php';
-                break;
-            case 'SearchController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/SearchController.php';
-                break;
-            case 'ReviewController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ReviewController.php';
-                break;
-            case 'ElementController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ElementController.php';
-                break;
-            case 'AskFAQController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/AskFAQController.php';
-                break;*/
+            /*
+        case 'ProductController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ProductController.php';
+            break;
+        case 'SearchController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/SearchController.php';
+            break;
+        case 'ReviewController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ReviewController.php';
+            break;
+        case 'ElementController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ElementController.php';
+            break;
+        case 'AskFAQController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/AskFAQController.php';
+            break;*/
         }
 
         break;

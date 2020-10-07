@@ -140,11 +140,15 @@ order by Comment.createTime desc;
     return $res;
 }
 
-function getPostList($filter){
+function getPostList($keyword,$lastIdx){
     $pdo = pdoSqlConnect();
     //filter 미구현
     $query = "select post_id, nick_name,content, Post.createTime, post_image from Post
-join User on Post.user_id = User.user_id where Post.isDeleted = 0 order by Post.createTime desc
+join User on Post.user_id = User.user_id where Post.isDeleted = 0 order by Post.createTime DESC limit ".$lastIdx.",10;";
+    if(isset($keyword)) {
+        $query .= " and content like '%".$keyword."%' ";
+    }
+    $query .=" order by Post.createTime desc
 limit 0, 5;";
     //댓글 카운트와 like카운트
     $st = $pdo->prepare($query);
@@ -267,4 +271,30 @@ function deleteComment($comment_id){
 
     $st = null;
     $pdo = null;
+}
+
+function checkPostPermission($user_id,$post_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Post WHERE post_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$post_id, $user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
+}
+
+function checkCommentPermission($user_id,$comment_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE comment_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$comment_id, $user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
 }

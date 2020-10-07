@@ -109,7 +109,7 @@ try {
                 failRes($res,"이미 탈퇴된 id입니다",202);
                 break;
             }
-            if(checkIfIsExist("User",["user_id"],[$userId])){
+            if(!checkIfExist("User",["user_id"],[$userId])){
                 failRes($res,"존재하지 않는 아이디 입니다.",203);
                 break;
             }
@@ -127,7 +127,7 @@ try {
                 break;
             }
 
-            if(checkIfIsExist("User",["user_id"],[$vars["user-id"]])){
+            if(!checkIfExist("User",["user_id"],[$vars["user-id"]])){
                 failRes($res,"존재하지 않는 아이디 입니다.",203);
                 break;
             }
@@ -148,7 +148,7 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
-            if(checkIfIsExist("User",["user_id"],[$userId])){
+            if(!checkIfExist("User",["user_id"],[$userId])){
                 failRes($res,"존재하지 않는 아이디 입니다.",203);
                 break;
             }

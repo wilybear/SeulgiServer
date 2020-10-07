@@ -32,7 +32,22 @@ try {
 
         case "createExchangeReq":
             http_response_code(200);
-            $res->result = createExchangeReq($req->sender_id,$req->resume_id);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+            if(!checkIfExist("TalentResume",["resume_id"],[$req->resume_id])){
+                failRes($res, "존재하지 않는 교환서입니다.", 211);
+                break;
+            }
+            if(checkExchangeHistory($userId,$req->resume_id)){
+                failRes($res, "교환 신청 중인 교환서입니다.", 211);
+                break;
+            }
+            $res->result = createExchangeReq($userId,$req->resume_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 요청 성공";
@@ -57,6 +72,18 @@ try {
         case "acceptExchangeReq":
             http_response_code(200);
             //TODO: $req->user_id 유저 체크 , 중복 xx
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkExchange($userId,$req->exchange_id)){
+                failRes($res, "존재하지 않는 교환 요청입니다..", 211);
+                break;
+            }
             $res->result = acceptExchangeReq($req->exchange_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
@@ -65,15 +92,35 @@ try {
             break;
         case "getExchangedReqs":
             http_response_code(200);
-            $res->result = getExchangedReqs($vars["user-id"]);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+            $res->result = getExchangedReqs($userId);
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "교환한 교환들 조회 성공";
+            $res->message = "교환 요청들 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "ExchangeInfo":
             http_response_code(200);
-            $res->result = getExchangeInfo($_GET["user-id"],$_GET["op-resume-id"]);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkIfExist("ExchangeRequest",["sender_id,resume_id"],[$userId,$_GET["op-resume-id"]])){
+                failRes($res,"교환 신청이 제대로 이루어지지 않았습니다.",201);
+                break;
+            }
+
+            $res->result = getExchangeInfo($userId,$_GET["op-resume-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 정보 조회";
@@ -86,6 +133,26 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 정보 조회";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "deleteExchangeReq":
+            http_response_code(200);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkExchangePermission($userId,$_GET["exchange-id"])){
+                failRes($res,"권한이 없습니다",201);
+                break;
+            }
+            $res->result = deleteExchange($_GET["exchange-id"]);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환 요청 삭제 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

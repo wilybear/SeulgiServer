@@ -13,6 +13,8 @@ function createExchangeReq($sender_id,$resume_id){
     $st = $pdo->prepare($query);
     $st->execute([$sender_id,$resume_id,$receiver_id]);
 
+    //sendFcm($fcmToken, $data, $key, $deviceType)
+
     $st = null;
     $pdo = null;
 }
@@ -44,6 +46,7 @@ function acceptExchangeReq($exchange_id){
     $st = $pdo->prepare($query);
     $st->execute([$exchange_id]);
 
+    //sendFcm($fcmToken, $data, $key, $deviceType)
     $st = null;
     $pdo = null;
 }
@@ -74,7 +77,7 @@ function getSendedExchangeReqs($user_id){
 function getExchangedReqs($user_id){
     $pdo = pdoSqlConnect();
     //상대가 보냈는데 수락한 요청, 보낸 요청이 수락됬을때 3가지
-    $query = "select exchange_id,sender_id ,receiver_id,updateTime, isExchanged  from ExchangeRequest where (sender_id = ? or receiver_id = ?) and isExchanged = 1;";
+    $query = "select exchange_id,sender_id ,receiver_id,updateTime, isExchanged  from ExchangeRequest where (sender_id = ? or receiver_id = ?);";
     $st = $pdo->prepare($query);
     $st->execute([$user_id,$user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -87,11 +90,18 @@ function getExchangedReqs($user_id){
             $opponent_id = $exchanges["sender_id"];
             $isSender = false;
         }
-        $query = "select nick_name as opponent_nick, resume_id as opponent_resume_id from User join TalentResume TR on User.user_id = TR.user_id where User.user_id = ? and TR.isDeleted =0;";
+        $query = "select nick_name as opponent_nick,profile_img ,resume_id as opponent_resume_id,  phone  from User join TalentResume TR on User.user_id = TR.user_id where User.user_id = ? and TR.isDeleted =0;";
         $st = $pdo->prepare($query);
         $st->execute([$opponent_id]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $exchanges += $st->fetchAll()[0];
+        if($exchanges['profile_img']!=null) {
+            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $exchanges['profile_img'];
+            $exchanges['profile_img'] = $absurl;
+        }
+        if($exchanges['isExchanged']==0){
+            $exchanges['phone']=null;
+        }
         $exchanges["isSender"]= $isSender;
     }
     $st = null;
@@ -188,4 +198,56 @@ function getExchangeInfo($user_id,$op_resume_id){
     $st = null;
     $pdo = null;
     return $res;
+}
+
+function checkExchangeHistory($user_id,$resume_id)
+{
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM ExchangeRequest WHERE resume_id = ? and (sender_id = ? or receiver_id = ?) and isExchanged = 1 and isDeleted =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$resume_id, $user_id,$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
+}
+
+function checkExchange($user_id,$exchange_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM ExchangeRequest WHERE exchange_id = ? and receiver_id = ? and isExchanged = 0 and isDeleted =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$exchange_id,$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
+}
+
+
+function deleteExchange($exchange_id){
+    $pdo = pdoSqlConnect();
+    $query = "UPDATE ExchangeRequest set isDeleted = 1 WHERE exchange_id = ? ;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$exchange_id]);
+
+    $st = null;
+    $pdo = null;
+}
+
+function checkExchangePermission($user_id,$exchange_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM ExchangeRequest WHERE exchange_id = ? and sender_id = ?) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$exchange_id,$user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
 }
