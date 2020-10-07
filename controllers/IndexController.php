@@ -66,6 +66,14 @@ try {
         case "createUser":
             http_response_code(200);
             $check_nick = preg_match($nick_regex,$req->nick);
+            if(checkIfExist("User",["phone"],[$req->phone])){
+                failRes($res,"해당 전화번호로 가입한 이력이 존재합니다.",203);
+                break;
+            }
+            if(checkIfExist("User",["user_email"],[$req->email])){
+                failRes($res,"해당 이메일로 가입한 이력이 존재합니다.",203);
+                break;
+            }
             if($check_nick!=true){
                 failRes($res,"올바르지 않은 닉네임입니다.",203);
                 //4~15자 영어 숫자 한글만
@@ -83,7 +91,7 @@ try {
             and isset($req->SNS)) {
                 //$profileImgFile = $_FILES['image']['tmp_name'];
                 $res->result = createUser($req->name, $req->email, $req->nick, $req->profileImgFile, $req->phone
-                    , $req->region, $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
+                    , $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "유저 생성 성공";
@@ -167,7 +175,7 @@ try {
                 break;
             }
             $res->result = updateUser($req->nick,$req->profileImg,$req->phone
-                ,$req->region,$req->user_id);
+                ,$req->user_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 수정 성공";

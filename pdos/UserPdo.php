@@ -1,16 +1,16 @@
 <?php
 
 function createUser($name,$email,$nick,$profileImgFile,$phone
-                ,$region,$birth,$SNS,$sex,$snsToken,$FCMToken)
+                ,$birth,$SNS,$sex,$snsToken,$FCMToken)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
         $query = "INSERT INTO User (user_name,user_email,nick_name,phone
-,region, birth, SNS, sex, snsToken,FCMToken) VALUES (?,?,?,?,?,?,?,?,?,?);";
+, birth, SNS, sex, snsToken,FCMToken) VALUES (?,?,?,?,?,?,?,?,?);";
         $st = $pdo->prepare($query);
         $st->execute([$name, $email, $nick, $phone
-            , $region, $birth, $SNS, $sex, $snsToken, $FCMToken]);
+            , $birth, $SNS, $sex, $snsToken, $FCMToken]);
         $user_id = $pdo->lastInsertId();
 
         if($profileImgFile != null) {
@@ -50,7 +50,7 @@ function createUser($name,$email,$nick,$profileImgFile,$phone
 function getUserInfo($user_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT user_name,user_email,nick_name,profile_img,phone
-,region, birth, sex FROM User WHERE user_id= ? and isDeleted = 0 ;";
+,birth, sex,YEAR(CURDATE()) - YEAR(birth) AS age FROM User WHERE user_id= ? and isDeleted = 0 ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
@@ -69,7 +69,7 @@ function getUserInfo($user_id){
 }
 
 function updateUser($nick,$profileImg,$phone
-    ,$region,$user_id){
+    ,$user_id){
     $pdo = pdoSqlConnect();
     //user 확인 필요, img update 처리
     $query = "SELECT profile_img FROM User WHERE user_id = ? and isDeleted = 0;";
@@ -102,12 +102,12 @@ function updateUser($nick,$profileImg,$phone
     }
 
     $query = "UPDATE User SET nick_name = ?,profile_img = ?,phone = ?
-,region = ? WHERE user_id= ? and isDeleted = 0";
+ WHERE user_id= ? and isDeleted = 0";
 
 
     $st = $pdo->prepare($query);
     $st->execute([$nick,$profileImg,$phone
-        ,$region,$user_id]);
+        ,$user_id]);
 
     $st = null;
     $pdo = null;
