@@ -39,7 +39,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
     $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
     $r->addRoute('DELETE', '/user', ['IndexController', 'deleteUser']);
-    $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
+    $r->addRoute('GET', '/user', ['IndexController', 'getUserInfo']);
     $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
 
 
@@ -52,11 +52,11 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
 
     //교환서 상세 페이지
-    $r->addRoute('GET', '/resume-info/basic/{resume-id}', ['SeulgiController', 'getResumeBasic']);
-    $r->addRoute('GET', '/resume-info/talent-have/{resume-id}', ['SeulgiController', 'getTalentHave']);
-    $r->addRoute('GET', '/resume-info/talent-want/{resume-id}', ['SeulgiController', 'getTalentWant']);
-    $r->addRoute('GET', '/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
-    $r->addRoute('GET', '/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
+    $r->addRoute('GET', '/seulgi/resume-info/basic/{resume-id}', ['SeulgiController', 'getResumeBasic']);
+    $r->addRoute('GET', '/seulgi/resume-info/talent-have/{resume-id}', ['SeulgiController', 'getTalentHave']);
+    $r->addRoute('GET', '/seulgi/resume-info/talent-want/{resume-id}', ['SeulgiController', 'getTalentWant']);
+    $r->addRoute('GET', '/seulgi/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
+    $r->addRoute('GET', '/seulgi/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
 
     //후기
     $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
@@ -68,11 +68,11 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/exchange-management/exchange', ['ExchangeController', 'createExchangeReq']);
     $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['ExchangeController', 'getReceivedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
-    $r->addRoute('GET', '/exchange-management/exchanged-exchanges', ['ExchangeController', 'getExchangedReqs']);
+    $r->addRoute('GET', '/exchange-management/exchanges', ['ExchangeController', 'getExchangedReqs']);
     $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
     $r->addRoute('GET', '/exchange-management/exchange-result', ['ExchangeController', 'ExchangeInfo']);
     $r->addRoute('GET', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'getExchangeReq']);
-    $r->addRoute('DELETE', '/exchange-management/exchange', ['ExchangeController', 'deleteExchangeReq']);
+    $r->addRoute('DELETE', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'deleteExchangeReq']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);

@@ -41,25 +41,25 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!checkIfExist("TalentResume",["resume_id"],[$req->resume_id])){
-                failRes($res, "존재하지 않는 교환서입니다.", 211);
+                failRes($res, "존재하지 않는 교환서입니다.", 204);
                 break;
             }
             if(!checkExchangeHistory($userId,$req->resume_id)){
-                failRes($res,"슬기 교환 내역 없음",201);
+                failRes($res,"슬기 교환 내역 없음",204);
                 break;
             }
 
             if(checkIfExist("Review",["reviewer_id","resume_id"],[$userId,$req->resume_id])){
-                failRes($res,"이미 후기를 남겼습니다.",201);
+                failRes($res,"이미 후기를 남겼습니다.",203);
                 break;
             }
 
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
                 break;
             }
             
-            $res->result = createReview($userId,$req->resume_id,$req->content,$req->rate);
+            createReview($userId,$req->resume_id,$req->content,$req->rate);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "리뷰 생성 성공";
@@ -76,16 +76,16 @@ try {
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             
             if(!checkIfExist("Review",["review_id"],[$vars["review-id"]])){
-                failRes($res, "후기가 존재하지 않습니다.", 211);
+                failRes($res, "후기가 존재하지 않습니다.", 204);
                 break;
             }
             
             if(!checkReivewPermission($userId,$vars["review-id"])){
-                failRes($res, "수정 권한 없음.", 211);
+                failRes($res, "수정 권한 없음.", 205);
                 break;
             }
             
-            $res->result = deleteReview($vars["review-id"]);
+             deleteReview($vars["review-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "리뷰 삭제 성공";
@@ -93,6 +93,11 @@ try {
             break;
         case "getReviews":
             http_response_code(200);
+            if(!checkIfExist("Review",["review_id"],[$vars["review-id"]])){
+                failRes($res, "존재하지 않는 리뷰id입니다.", 204);
+                break;
+            }
+
             $res->result = getReview($vars["review-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
@@ -111,21 +116,21 @@ try {
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!checkIfExist("Review",["review_id"],[$req->review_id])){
-                failRes($res, "후기가 존재하지 않습니다.", 211);
+                failRes($res, "후기가 존재하지 않습니다.", 204);
                 break;
             }
 
             if(!checkReivewPermission($userId,$req->review_id)){
-                failRes($res, "수정 권한 없음.", 211);
+                failRes($res, "수정 권한 없음.", 205);
                 break;
             }
 
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
                 break;
             }
 
-            $res->result = updateReview($req->review_id,$req->content,$req->rate);
+            updateReview($req->review_id,$req->content,$req->rate);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "리뷰 수정 성공";

@@ -40,14 +40,14 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!checkIfExist("TalentResume",["resume_id"],[$req->resume_id])){
-                failRes($res, "존재하지 않는 교환서입니다.", 211);
+                failRes($res, "존재하지 않는 교환서입니다.", 204);
                 break;
             }
             if(checkExchangeHistory($userId,$req->resume_id)){
-                failRes($res, "교환 신청 중인 교환서입니다.", 211);
+                failRes($res, "교환 신청 중인 교환서입니다.", 203);
                 break;
             }
-            $res->result = createExchangeReq($userId,$req->resume_id);
+            createExchangeReq($userId,$req->resume_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 요청 성공";
@@ -81,10 +81,10 @@ try {
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!checkExchange($userId,$req->exchange_id)){
-                failRes($res, "존재하지 않는 교환 요청입니다..", 211);
+                failRes($res, "존재하지 않는 교환 요청입니다..", 204);
                 break;
             }
-            $res->result = acceptExchangeReq($req->exchange_id);
+            acceptExchangeReq($req->exchange_id);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = " 교환 요청 수락 성공";
@@ -115,8 +115,8 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
-            if(!checkIfExist("ExchangeRequest",["sender_id,resume_id"],[$userId,$_GET["op-resume-id"]])){
-                failRes($res,"교환 신청이 제대로 이루어지지 않았습니다.",201);
+            if(!checkIfExist("ExchangeRequest",["sender_id","resume_id"],[$userId,$_GET["op-resume-id"]])){
+                failRes($res,"교환 신청이 제대로 이루어지지 않았습니다.",206);
                 break;
             }
 
@@ -145,11 +145,11 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
-            if(!checkExchangePermission($userId,$_GET["exchange-id"])){
-                failRes($res,"권한이 없습니다",201);
+            if(!checkExchangePermission($userId,$vars["exchange-id"])){
+                failRes($res,"권한이 없습니다",205);
                 break;
             }
-            $res->result = deleteExchange($_GET["exchange-id"]);
+            deleteExchange($vars["exchange-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환 요청 삭제 성공";

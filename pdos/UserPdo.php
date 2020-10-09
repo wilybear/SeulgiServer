@@ -117,7 +117,7 @@ function deleteUser($user_id){
     $pdo = pdoSqlConnect();
     //user 확인
     $query = "UPDATE User SET isDeleted = 1 WHERE user_id= ? and isDeleted = 0";
-    echo $user_id;
+
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
 
