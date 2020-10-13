@@ -33,15 +33,15 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
                 break;
             }
 
-            if(isset($req->post_image) and !checkImageExt($req->post_image)){
+            if(isset($req->post_image) and !preg_match(URL_REGEX,$req->post_image)){
                 failRes($res,"이미지 파일 형식 오류", 210);
                 break;
             }
-            $res->result = createPost($userId,$req->content,$req->post_image);
+            createPost($userId,$req->content,$req->post_image);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "게시글 작성 성공";
@@ -59,15 +59,19 @@ try {
 
 
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
+                break;
+            }
+            if(isset($req->post_image) and !preg_match(URL_REGEX,$req->post_image)){
+                failRes($res,"이미지 파일 형식 오류", 210);
                 break;
             }
 
             if(!checkPostPermission($userId,$req->post_id)){
-                failRes($res, "게시글 수정 권한이 없습니다.", 211);
+                failRes($res, "게시글 수정 권한이 없습니다.", 205);
                 break;
             }
-            $res->result = updatePost($req->post_id,$req->content,$req->post_image);
+            updatePost($req->post_id,$req->content,$req->post_image);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "게시글 수정 성공";
@@ -77,7 +81,7 @@ try {
             http_response_code(200);
             //user정보 받아서 좋아요 표시해야함
             if(!$res->result = getPost($vars["post-id"])){
-                failRes($res, "존재하지않는 게시글입니다..", 211);;
+                failRes($res, "존재하지않는 게시글입니다..", 204);;
                 break;
             }
             $res->isSuccess = TRUE;
@@ -91,7 +95,7 @@ try {
             $keyword = preg_replace("/[ #\&\+\-%@=\/\\\:;,\.'\"\^`~\_|\!\?\*$#<>()\[\]\{\}]/i", "", $_GET["keyword"]);
             $res->result = getPostList($keyword,$_GET["lastIdx"]);
             if(empty($res->result)){
-                failRes($res, "더 이상 게시글이 없습니다", 211);;
+                failRes($res, "더 이상 게시글이 없습니다", 212);;
                 break;
             }
             
@@ -110,11 +114,11 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
-            if(!checkPostPermission($userId,$_GET["post-id"])){
-                failRes($res, "게시글 수정 권한이 없습니다.", 211);
+            if(!checkPostPermission($userId,$vars["post-id"])){
+                failRes($res, "게시글 수정 권한이 없습니다.", 205);
                 break;
             }
-            $res->result = deletePost($_GET["post-id"]);
+            deletePost($vars["post-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "게시글 삭제 성공";
@@ -130,12 +134,12 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!checkIfExist("PostLike",["user_id","post_id"],[$userId,$req->post_id])) {
-                $res->result = likePost($userId, $req->post_id);
+               likePost($userId, $req->post_id);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "게시글 좋아요 성공";
             }else{
-                $res->result = deleteLikePost($userId, $req->post_id);
+                deleteLikePost($userId, $req->post_id);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "게시글 좋아요 취소 성공";
@@ -152,11 +156,11 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
                 break;
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
-            $res->result = createComment($req->post_id,$userId,$req->content);
+            createComment($req->post_id,$userId,$req->content);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "댓글 생성 성공";
@@ -174,15 +178,15 @@ try {
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!checkCommentPermission($userId,$req->comment_id)) {
-                failRes($res, "댓글 수정 권한이 없습니다.", 211);
+                failRes($res, "댓글 수정 권한이 없습니다.", 205);
                 break;
             }
 
             if(preg_match($content_regex, $req->content)!=true){
-                failRes($res, "올바르지 않은 내용 입니다.", 211);
+                failRes($res, "올바르지 않은 내용 입니다.", 202);
                 break;
             }
-            $res->result = updateComment($req->comment_id,$req->content);
+            updateComment($req->comment_id,$req->content);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "댓글 수정 성공";
@@ -199,11 +203,11 @@ try {
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
-            if(!checkCommentPermission($userId,$_GET["comment-id"])) {
-                failRes($res, "댓글 수정 권한이 없습니다.", 211);
+            if(!checkCommentPermission($userId,$vars["comment-id"])) {
+                failRes($res, "댓글 수정 권한이 없습니다.", 205);
                 break;
             }
-            $res->result = deleteComment($_GET["comment-id"]);
+            deleteComment($vars["comment-id"]);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "댓글 삭제 성공";

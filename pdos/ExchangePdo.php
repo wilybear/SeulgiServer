@@ -95,10 +95,10 @@ function getExchangedReqs($user_id){
         $st->execute([$opponent_id]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $exchanges += $st->fetchAll()[0];
-        if($exchanges['profile_img']!=null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $exchanges['profile_img'];
-            $exchanges['profile_img'] = $absurl;
-        }
+//        if($exchanges['profile_img']!=null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $exchanges['profile_img'];
+//            $exchanges['profile_img'] = $absurl;
+//        }
         if($exchanges['isExchanged']==0){
             $exchanges['phone']=null;
         }
@@ -133,12 +133,12 @@ function getExchangeReq($user_id,$exchange_id){
     }
 
     $res[0]["opponent"] = $st->fetchAll();
-    foreach ($res[0]["opponent"] as &$op) {
-        if ($op['profile_img'] != null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $op['profile_img'];
-            $op['profile_img'] = $absurl;
-        }
-    }
+//    foreach ($res[0]["opponent"] as &$op) {
+//        if ($op['profile_img'] != null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $op['profile_img'];
+//            $op['profile_img'] = $absurl;
+//        }
+//    }
 
     $st = null;
     $pdo = null;

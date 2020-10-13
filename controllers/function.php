@@ -28,7 +28,7 @@ function isValidHeader($jwt, $key)
         return false;
     }
 }
-
+/*
 function checkImageExt($image){
     if($image != null) {
         switch ($image{0}) {
@@ -44,6 +44,7 @@ function checkImageExt($image){
     }
     return true;
 }
+*/
 
 function sendFcm($fcmToken, $data, $key, $deviceType)
 {

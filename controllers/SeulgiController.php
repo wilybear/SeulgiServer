@@ -50,7 +50,7 @@ try {
             //이미지 체크
             if(isset($req->talent_images)) {
                 foreach ($req->talent_images as $image) {
-                    if (!checkImageExt($image->talent_image)) {
+                    if (!preg_match(URL_REGEX,$image->talent_image)) {
                         failRes($res, "이미지 파일 형식 오류", 210);
                         break;
                     }
@@ -93,13 +93,12 @@ try {
                 break;
             }
             $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
-            echo $userId." : userID\n";
             //이미지 체크
             if(isset($req->talent_images)) {
                 foreach ($req->talent_images as $image) {
-                    if (!checkImageExt($image->talent_image)) {
+                    if (!preg_match(URL_REGEX,$image->talent_image)){
                         failRes($res, "이미지 파일 형식 오류", 210);
-                        break;
+                        return;
                     }
                 }
             }
@@ -191,7 +190,7 @@ try {
             // 유저가 scrap을 했는지 알아보기 위해서는 유저 아이디를 건내야한다.
             $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],$_GET["isOnline"],$_GET["region"],$_GET["desired-day"],$_GET["lastIdx"]);
             if(empty($res->result)){
-                failRes($res, "교환서가 없습니다", 211);;
+                failRes($res, "더이상 교환서가 없습니다", 212);;
                 break;
             }
             $res->isSuccess = TRUE;

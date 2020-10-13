@@ -17,6 +17,7 @@ define("RESUME_UPLOAD_PATH",dirname(__FILE__)."/uploads/resume/");
 define("RESUME_RETRIVE_PATH","/uploads/resume/");
 define("POST_UPLOAD_PATH",dirname(__FILE__)."/uploads/community/");
 define("POST_RETRIVE_PATH","/uploads/community/");
+define("URL_REGEX","/\bhttps?:\/\/\S+(?:png|jpg|jpeg)\b/");
 
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
@@ -37,7 +38,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     /***** User ******/
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
-    $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
+    $r->addRoute('PUT', '/user', ['IndexController', 'updateUser']);
     $r->addRoute('DELETE', '/user', ['IndexController', 'deleteUser']);
     $r->addRoute('GET', '/user', ['IndexController', 'getUserInfo']);
     $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
@@ -46,7 +47,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     /***** Seulgi *****/
     //교환서
     $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
-    $r->addRoute('PATCH', '/seulgi/resume', ['SeulgiController', 'updateResume']);
+    $r->addRoute('PUT', '/seulgi/resume', ['SeulgiController', 'updateResume']);
     $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
     $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
     $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
@@ -62,14 +63,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
     $r->addRoute('GET', '/review/{review-id}', ['ReviewController', 'getReviews']);
     $r->addRoute('DELETE', '/review/{review-id}', ['ReviewController', 'deleteReview']);
-    $r->addRoute('PATCH', '/review', ['ReviewController', 'updateReview']);
+    $r->addRoute('PUT', '/review', ['ReviewController', 'updateReview']);
 
     //요청
     $r->addRoute('POST', '/exchange-management/exchange', ['ExchangeController', 'createExchangeReq']);
     $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['ExchangeController', 'getReceivedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/exchanges', ['ExchangeController', 'getExchangedReqs']);
-    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
+    $r->addRoute('PUT', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
     $r->addRoute('GET', '/exchange-management/exchange-result', ['ExchangeController', 'ExchangeInfo']);
     $r->addRoute('GET', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'getExchangeReq']);
     $r->addRoute('DELETE', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'deleteExchangeReq']);
@@ -80,14 +81,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     //피드 기능
     $r->addRoute('POST', '/post', ['PostController', 'createPost']);
-    $r->addRoute('PATCH', '/post', ['PostController', 'updatePost']);
+    $r->addRoute('PUT', '/post', ['PostController', 'updatePost']);
     $r->addRoute('GET', '/post/{post-id}', ['PostController', 'getPost']);
     $r->addRoute('GET', '/post-list', ['PostController', 'getPostList']);
-    $r->addRoute('DELETE', '/post', ['PostController', 'deletePost']);
+    $r->addRoute('DELETE', '/post/{post-id}', ['PostController', 'deletePost']);
     $r->addRoute('POST', '/post/like', ['PostController', 'likePost']);
     $r->addRoute('POST', '/post/comment', ['PostController', 'createComment']);
-    $r->addRoute('PATCH', '/post/comment', ['PostController', 'updateComment']);
-    $r->addRoute('DELETE', '/post/comment', ['PostController', 'deleteComment']);
+    $r->addRoute('PUT', '/post/comment', ['PostController', 'updateComment']);
+    $r->addRoute('DELETE', '/post/comment/{comment-id}', ['PostController', 'deleteComment']);
 
     //신고 기능
     $r->addRoute('POST', '/report', ['IndexController', 'reportContent']);

@@ -16,6 +16,7 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
         //교환서 이미지 저장 TODO: 갯수 제한, 중복처리
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
+        /*
         foreach ($talent_images as $talent_image){
             switch ($talent_image->talent_image{0}){
                 case '/':
@@ -34,6 +35,10 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
             fclose($file);
             //$url = $server_ip = gethostbyname(gethostname());
             $st->execute([$resume_id,$name]);
+        }
+        */
+        foreach ($talent_images as $talent_image){
+            $st->execute([$resume_id,$talent_image->talent_image]);
         }
 
         //희망 요일 저장  TODO: 중복처리
@@ -115,23 +120,7 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
-            switch ($talent_image->talent_image{0}){
-                case '/':
-                    $extension = 'jpg';
-                    break;
-                case 'i':
-                    $extension = 'png';
-                    break;
-                default:
-                    throw new Exception("wrong extension");
-            }
-            $binary=base64_decode($talent_image->talent_image);
-            $name = round(microtime(true) * 1000) . '.' . $extension;
-            $file = fopen(RESUME_UPLOAD_PATH . $name,'wb');
-            fwrite($file,$binary);
-            fclose($file);
-            //$url = $server_ip = gethostbyname(gethostname());
-            $st->execute([$resume_id,$name]);
+            $st->execute([$resume_id,$talent_image->talent_image]);
         }
 
         //희망 요일 수정
@@ -208,10 +197,12 @@ function getBasicResumeData($resume_id,$user_id){
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $temp = $st->fetchAll();
+    /*
     foreach($temp as &$image){
         $absurl = 'http://' .gethostbyname(gethostname()). RESUME_RETRIVE_PATH . $image['talent_image'];
         $image['talent_image'] = $absurl;
     }
+    */
     $res["talent_images"]= $temp;
 
     if(isset($user_id)) {
@@ -334,10 +325,10 @@ function getResumeData($resume_id){
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $temp = $st->fetchAll();
-    foreach($temp as &$image){
-        $absurl = 'http://' .gethostbyname(gethostname()). RESUME_RETRIVE_PATH . $image['talent_image'];
-        $image['talent_image'] = $absurl;
-    }
+//    foreach($temp as &$image){
+//        $absurl = 'http://' .gethostbyname(gethostname()). RESUME_RETRIVE_PATH . $image['talent_image'];
+//        $image['talent_image'] = $absurl;
+//    }
     $res["talent_images"]= $temp;
 
     //요일 불러오기
@@ -475,11 +466,7 @@ function deleteScrapResume($user_id, $resume_id){
 
 function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$region,$desired_day,$lastIdx){
     $pdo = pdoSqlConnect();
-    $query = "select TR.resume_id, title, TR.createTime, hit ,rate from TalentResume as TR ";
-
-    if(isset($talentWant) or isset($talentHave) or isset($region) or isset($desired_day) or isset($isOnline)){
-        $query .= "WHERE ";
-    }
+    $query = "select TR.resume_id, title, TR.createTime, hit ,rate from TalentResume as TR Where isDeleted=0 and ";
 
     if(isset($isOnline)){
         $query .= "TR.isOnline = ".$isOnline." and " ;
@@ -574,7 +561,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
 
     foreach ($res as &$resume){
         //가진 재능
-        $query = "select distinct cat_name as talent from TalentHave join TalentCat on talentCategory = talent_cat_id WHERE resume_id = ?";
+        $query = "select distinct cat_name as talent from TalentHave join TalentCat on talentCategory = talent_cat_id WHERE resume_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume["resume_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -588,7 +575,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
             $talent["detailed_talent"] = $st->fetchAll();
         }
         //원하는 재능
-        $query = " select distinct cat_name as talent from TalentWant join TalentCat on TalentWant.talent_cat_id = TalentCat.talent_cat_id WHERE resume_id = ?";
+        $query = " select distinct cat_name as talent from TalentWant join TalentCat on TalentWant.talent_cat_id = TalentCat.talent_cat_id WHERE resume_id = ? and isDeleted = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume["resume_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -620,7 +607,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
         $st = $pdo->prepare($query);
         $st->execute([$resume["resume_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
-        $resume["scrapCnt"] = $st->fetchAll()[0];
+        $resume["scrapCnt"] = $st->fetchAll()[0]["cnt"];
     }
 
 

@@ -35,12 +35,12 @@ where review_id = ? and Review.isDeleted = 0;";
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
-    foreach($res as &$image){
-        if($image['profile_img']!=null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
-            $image['profile_img'] = $absurl;
-        }
-    }
+//    foreach($res as &$image){
+//        if($image['profile_img']!=null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
+//            $image['profile_img'] = $absurl;
+//        }
+//    }
     $st = null;
     $pdo = null;
 
@@ -60,12 +60,12 @@ where resume_id = ? and Review.isDeleted = 0 order by Review.createTime DESC ;";
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
-    foreach($res as &$image){
-        if($image['profile_img']!=null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
-            $image['profile_img'] = $absurl;
-        }
-    }
+//    foreach($res as &$image){
+//        if($image['profile_img']!=null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $image['profile_img'];
+//            $image['profile_img'] = $absurl;
+//        }
+//    }
     $st = null;
     $pdo = null;
 
