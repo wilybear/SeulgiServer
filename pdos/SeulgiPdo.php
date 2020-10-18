@@ -1,15 +1,15 @@
 <?php
 
-function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
+function createResume($user_id,$title,$introduction,$talent_images,$online_flag,$desired_day,$desired_regions,
                     $talent_have,$talent_want,$wish)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
         //교환서 기본 사항 저장 TODO: 중복처리
-        $query = "INSERT INTO TalentResume (user_id,title, introduction, isOnLine,wish) VALUES (?,?,?,?,?);";
+        $query = "INSERT INTO TalentResume (user_id,title, introduction, online_flag,wish) VALUES (?,?,?,?,?);";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id,$title,$introduction,$isOnLine,$wish]);
+        $st->execute([$user_id,$title,$introduction,$online_flag,$wish]);
         $resume_id = $pdo->lastInsertId();
 
 
@@ -65,7 +65,7 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
             }
             //대분류 category는 중복해서 쓰지 못함
 
-            $query = "INSERT INTO TalentHave (resume_id,talentCategory,introduction,academic_bg,career,certificate,curriculum) VALUES (?,?,?,?,?,?,?)";
+            $query = "INSERT INTO TalentHave (resume_id,talent_cat_id,introduction,academic_bg,career,certificate,curriculum) VALUES (?,?,?,?,?,?,?)";
             $st = $pdo->prepare($query);
             $st->execute([$resume_id,$talent_cat_id,$talent->introduction,$talent->academic_bg,$talent->career,$talent->certificate,$talent->curriculum]);
         }
@@ -96,7 +96,7 @@ function createResume($user_id,$title,$introduction,$talent_images,$isOnLine,$de
 }
 
 
-function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$isOnLine,$desired_day,$desired_regions,
+function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$online_flag,$desired_day,$desired_regions,
                       $talent_have,$talent_want, $wish)
 {
     $pdo = pdoSqlConnect();
@@ -105,13 +105,13 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
         //교환서 기본 사항 수정
 
         //record가 여러개인 테이블들에는 기존 데이터를 삭제하고 새로운 데이터를 넣어줌
-        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, isOnLine = ?, wish = ? WHERE resume_id = ? and isDeleted = 0";
+        $query = "UPDATE TalentResume SET user_id = ?,title = ?, introduction = ?, online_flag = ?, wish = ? WHERE resume_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id,$title,$introduction,$isOnLine,$wish,$resume_id]);
+        $st->execute([$user_id,$title,$introduction,$online_flag,$wish,$resume_id]);
 
         $TABLES = ["TalentHave", "TalentWant","Region","DetailedWant","DetailedHave","TalentImage"];
         foreach ($TABLES as $TABLE){
-            $query = "UPDATE ".$TABLE." set isDeleted = 1 WHERE resume_id = ? and isDeleted = 0 ;";
+            $query = "UPDATE ".$TABLE." set delete_flag = 1 WHERE resume_id = ? and delete_flag = 0 ;";
             $st = $pdo->prepare($query);
             $st->execute([$resume_id]);
         }
@@ -124,7 +124,7 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
         }
 
         //희망 요일 수정
-        $query = "UPDATE DesiredDay SET mon=?, tue=?, wed=?, thu=?, fri=?, sat=?, sun=? WHERE resume_id = ? and isDeleted = 0";
+        $query = "UPDATE DesiredDay SET mon=?, tue=?, wed=?, thu=?, fri=?, sat=?, sun=? WHERE resume_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
         $st->execute([$desired_day->mon,$desired_day->tue,$desired_day->wed,$desired_day->thu,$desired_day->fri,$desired_day->sat,$desired_day->sun,$resume_id]);
 
@@ -147,7 +147,7 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
             }
             //대분류 category는 중복해서 쓰지 못함
 
-            $query = "INSERT INTO TalentHave (resume_id,talentCategory,introduction,academic_bg,career,certificate,curriculum) VALUES (?,?,?,?,?,?,?)";
+            $query = "INSERT INTO TalentHave (resume_id,talent_cat_id,introduction,academic_bg,career,certificate,curriculum) VALUES (?,?,?,?,?,?,?)";
             $st = $pdo->prepare($query);
             $st->execute([$resume_id,$talent_cat_id,$talent->introduction,$talent->academic_bg,$talent->career,$talent->certificate,$talent->curriculum]);
         }
@@ -171,9 +171,11 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$i
     }catch (Exception $e){
         echo $e."rollbakc됨";
         $pdo->rollback();
+        return false;
     }
     $st = null;
     $pdo = null;
+    return true;
 
 }
 
@@ -186,13 +188,13 @@ function getBasicResumeData($resume_id,$user_id){
     $st->execute([$resume_id]);
 
     //제목, 아이디 간단한 소개, online여부
-    $query = "SELECT user_id, title, introduction FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT user_id, title, introduction FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
     //이미지
-    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -219,20 +221,20 @@ function getBasicResumeData($resume_id,$user_id){
 
 function getTalentHave($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT talentCategory,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_cat_id,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_have"]= $st->fetchAll();
 
     foreach($res["talent_have"] as &$talent){
-        $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $talent["category"]=getCategoryName($talent["talent_cat_id"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$resume_id,$talent["talentCategory"]]);
+        $st->execute([$resume_id,$talent["talent_cat_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $talent["detailed_talent"] = $st->fetchAll();
-        unset($talent["talentCategory"]);
+        unset($talent["talent_cat_id"]);
     }
 
     $st = null;
@@ -243,19 +245,19 @@ function getTalentHave($resume_id){
 
 function getTalentWant($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT talent_cat_id as talentCategory,desired_info FROM TalentWant WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_cat_id ,desired_info FROM TalentWant WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_want"]= $st->fetchAll();
     foreach($res["talent_want"] as &$talent){
-        $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $talent["category"]=getCategoryName($talent["talent_cat_id"]);
+        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$resume_id,$talent["talentCategory"]]);
+        $st->execute([$resume_id,$talent["talent_cat_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $talent["detailed_talent"] = $st->fetchAll();
-        unset($talent["talentCategory"]);
+        unset($talent["talent_cat_id"]);
     }
 
     $st = null;
@@ -268,20 +270,20 @@ function getDesiredCondition($resume_id){
 
     $pdo = pdoSqlConnect();
     //희망 사항, 온라인 여부 불러오기
-    $query = "SELECT isOnLine, wish FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT online_flag, wish FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
 //요일 불러오기
-    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["desired_day"]= $st->fetchAll();
 
     //지역 불러오기
-    $query = "SELECT desired_region FROM Region WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT desired_region FROM Region WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -295,7 +297,7 @@ function getDesiredCondition($resume_id){
 
 function getResumeReviews($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT rate FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT rate FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -313,14 +315,14 @@ function getResumeData($resume_id){
     $pdo = pdoSqlConnect();
 
     //이력서 기본정보 불러오기
-    $query = "SELECT user_id, title, introduction, isOnLine, wish FROM TalentResume WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT user_id, title, introduction, online_flag, wish FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
 
     //이미지 경로 불러오기
-    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -332,48 +334,48 @@ function getResumeData($resume_id){
     $res["talent_images"]= $temp;
 
     //요일 불러오기
-    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["desired_day"]= $st->fetchAll();
 
     //지역 불러오기
-    $query = "SELECT desired_region FROM Region WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT desired_region FROM Region WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["desired_regions"]= $st->fetchAll();
 
-    $query = "SELECT talentCategory,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_cat_id,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_have"]= $st->fetchAll();
 
     foreach($res["talent_have"] as &$talent){
-        $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $talent["category"]=getCategoryName($talent["talent_cat_id"]);
+        $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$resume_id,$talent["talentCategory"]]);
+        $st->execute([$resume_id,$talent["talent_cat_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $talent["detailed_talent"] = $st->fetchAll();
-        unset($talent["talentCategory"]);
+        unset($talent["talent_cat_id"]);
     }
 
-    $query = "SELECT talent_cat_id as talentCategory,desired_info FROM TalentWant WHERE resume_id = ? and isDeleted = 0;";
+    $query = "SELECT talent_cat_id ,desired_info FROM TalentWant WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res["talent_want"]= $st->fetchAll();
     foreach($res["talent_want"] as &$talent){
-        $talent["category"]=getCategoryName($talent["talentCategory"]);
-        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+        $talent["category"]=getCategoryName($talent["talent_cat_id"]);
+        $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
-        $st->execute([$resume_id,$talent["talentCategory"]]);
+        $st->execute([$resume_id,$talent["talent_cat_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $talent["detailed_talent"] = $st->fetchAll();
-        unset($talent["talentCategory"]);
+        unset($talent["talent_cat_id"]);
     }
 
     $st = null;
@@ -388,7 +390,7 @@ function deleteResume($resume_id){
         $pdo->beginTransaction();
         $TABLES = ["TalentHave", "TalentWant", "TalentResume", "TalentImage","Region","DetailedWant", "DesiredDay","DetailedHave"];
         foreach ($TABLES as $TABLE){
-            $query = "UPDATE ".$TABLE." set isDeleted = 1 WHERE resume_id = ? and isDeleted = 0 ;";
+            $query = "UPDATE ".$TABLE." set delete_flag = 1 WHERE resume_id = ? and delete_flag = 0 ;";
             $st = $pdo->prepare($query);
             $st->execute([$resume_id]);
         }
@@ -429,7 +431,7 @@ function getCategoryName($category_id){
 
 function getDetailedCategoryId($detailed,$category_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT detailed_cat_id FROM DetailedCat WHERE cat_name = ? and talentCategory_id = ?;";
+    $query = "SELECT detailed_cat_id FROM DetailedCat WHERE cat_name = ? and talent_cat_id = ?;";
 
     $st = $pdo->prepare($query);
     $st->execute([$detailed,$category_id]);
@@ -464,12 +466,12 @@ function deleteScrapResume($user_id, $resume_id){
     $pdo = null;
 }
 
-function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$region,$desired_day,$lastIdx){
+function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$region,$desired_day,$lastIdx,$detailedWant,$detailedHave){
     $pdo = pdoSqlConnect();
-    $query = "select TR.resume_id, title, TR.createTime, hit ,rate from TalentResume as TR Where isDeleted=0 and ";
+    $query = "select TR.resume_id, title, TR.created_time, hit ,rate from TalentResume as TR Where delete_flag=0 and ";
 
-    if(isset($isOnline)){
-        $query .= "TR.isOnline = ".$isOnline." and " ;
+    if(isset($online_flag)){
+        $query .= "TR.online_flag = ".$online_flag." and " ;
     }
 
     $i = 0;
@@ -496,13 +498,48 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
         foreach ($talentHave as $talent) {
             $cat_id = getCategoryId($talent);
             if($i == $len-1) {
-                $query .= "TH.talentCategory = " . $cat_id;
+                $query .= "TH.talent_cat_id = " . $cat_id;
             }else {
-                $query .= "TH.talentCategory = " . $cat_id . " or ";
+                $query .= "TH.talent_cat_id = " . $cat_id . " or ";
             }
             $i++;
         }
         $query .= ")) and ";
+    }
+
+    //상세 재능
+    $i = 0;
+    $len = count($detailedWant);
+    if(isset($detailedWant)){
+        $query .= "exists(select * from DetailedWant as TW where TR.resume_id = TW.resume_id and (";
+        foreach ($detailedWant as $talent) {
+            $cat_id = getDetailedCategoryId($talent);
+            if($i == $len-1) {
+                $query .= "TW.detailed_cat_id = " . $cat_id;
+            }else {
+                $query .= "TW.detailed_cat_id = " . $cat_id . " or ";
+            }
+            $i++;
+        }
+        $query .= ")) and ";
+
+    }
+
+    $i = 0;
+    $len = count($detailedHave);
+    if(isset($detailedHave)){
+        $query .= "exists(select * from DetailedHave as TW where TR.resume_id = TW.resume_id and (";
+        foreach ($detailedHave as $talent) {
+            $cat_id = getDetailedCategoryId($talent);
+            if($i == $len-1) {
+                $query .= "TW.detailed_cat_id = " . $cat_id;
+            }else {
+                $query .= "TW.detailed_cat_id = " . $cat_id . " or ";
+            }
+            $i++;
+        }
+        $query .= ")) and ";
+
     }
 
     $i = 0;
@@ -535,13 +572,14 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
         $query .= ")) and ";
     }
 
+
     //마지막 and 제거
     $query = substr($query,0,-4);
 
     switch ($filter) {
         //최신순
         case 0:
-            $query .= " order by updateTime DESC limit ".$lastIdx.",10;";
+            $query .= " order by updated_time DESC limit ".$lastIdx.",10;";
             break;
             //후기순
         case 1:
@@ -552,7 +590,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
             $query .= " order by hit limit ".$lastIdx.",10;";
             break;
         default:
-            $query .= " order by updateTime DESC limit ".$lastIdx.",10;";
+            $query .= " order by updated_time DESC limit ".$lastIdx.",10;";
     }
     $st = $pdo->prepare($query);
     $st->execute();
@@ -561,28 +599,28 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
 
     foreach ($res as &$resume){
         //가진 재능
-        $query = "select distinct cat_name as talent from TalentHave join TalentCat on talentCategory = talent_cat_id WHERE resume_id = ? and isDeleted = 0";
+        $query = "select distinct cat_name as talent from TalentHave TH join TalentCat TC on TH.talent_cat_id = TC.talent_cat_id WHERE resume_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume["resume_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $resume["talentHave"] = $st->fetchAll();
         foreach($resume["talentHave"] as &$talent){
             $talent_cat_id =  getCategoryId($talent["talent"]);
-            $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+            $query = "SELECT cat_name as detailed FROM DetailedHave NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
             $st = $pdo->prepare($query);
             $st->execute([$resume["resume_id"], $talent_cat_id ]);
             $st->setFetchMode(PDO::FETCH_ASSOC);
             $talent["detailed_talent"] = $st->fetchAll();
         }
         //원하는 재능
-        $query = " select distinct cat_name as talent from TalentWant join TalentCat on TalentWant.talent_cat_id = TalentCat.talent_cat_id WHERE resume_id = ? and isDeleted = 0";
+        $query = " select distinct cat_name as talent from TalentWant join TalentCat on TalentWant.talent_cat_id = TalentCat.talent_cat_id WHERE resume_id = ? and delete_flag = 0";
         $st = $pdo->prepare($query);
         $st->execute([$resume["resume_id"]]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
         $resume["talentWant"] = $st->fetchAll();
         foreach($resume["talentWant"] as &$talent){
             $talent_cat_id = getCategoryId($talent["talent"]);
-            $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and isDeleted = 0";
+            $query = "SELECT cat_name as detailed FROM DetailedWant NATURAL JOIN DetailedCat WHERE resume_id = ? AND talent_cat_id = ? and delete_flag = 0";
             $st = $pdo->prepare($query);
             $st->execute([$resume["resume_id"],$talent_cat_id ]);
             $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -619,7 +657,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$isOnline,$regio
 
 function checkResumePermission($resume_id,$user_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM TalentResume WHERE resume_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $query = "SELECT EXISTS(SELECT * FROM TalentResume WHERE resume_id = ? and user_id = ? and delete_flag =0) As exist; ";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id,$user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);

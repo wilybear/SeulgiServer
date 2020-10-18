@@ -44,8 +44,8 @@ try {
                 failRes($res, "존재하지 않는 교환서입니다.", 204);
                 break;
             }
-            if(!checkExchangeHistory($userId,$req->resume_id)){
-                failRes($res,"슬기 교환 내역 없음",204);
+            if(!checkIsSender($userId,$req->resume_id)){
+                failRes($res,"Sender가 아님",204);
                 break;
             }
 

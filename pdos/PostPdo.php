@@ -88,8 +88,8 @@ function updatePost($post_id,$content,$post_image){
 
 function getPost($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select User.user_id,nick_name,profile_img, content, Post.createTime, post_image from Post
-join User on Post.user_id = User.user_id where post_id = ? and Post.isDeleted = 0;";
+    $query = "select User.user_id,nick_name,profile_img, content, Post.created_time, post_image from Post
+join User on Post.user_id = User.user_id where post_id = ? and Post.delete_flag = 0;";
 
 
     //댓글 카운트와 like카운트
@@ -116,10 +116,10 @@ join User on Post.user_id = User.user_id where post_id = ? and Post.isDeleted = 
 
 
     //comment들 불러오기
-    $query = "select nick_name,content, User.user_id, profile_img,Comment.createTime,comment_id  from Comment
+    $query = "select nick_name,content, User.user_id, profile_img,Comment.created_time,comment_id  from Comment
 join User on Comment.user_id = User.user_id 
-where Comment.isDeleted = 0 and post_id = ? 
-order by Comment.createTime desc;
+where Comment.delete_flag = 0 and post_id = ? 
+order by Comment.created_time desc;
 ";
 
     //댓글 카운트와 like카운트
@@ -143,12 +143,12 @@ order by Comment.createTime desc;
 function getPostList($keyword,$lastIdx){
     $pdo = pdoSqlConnect();
     //filter 미구현
-    $query = "select post_id, nick_name,content, Post.createTime, post_image from Post
-join User on Post.user_id = User.user_id where Post.isDeleted = 0 ";
+    $query = "select post_id, nick_name,content, Post.created_time, post_image from Post
+join User on Post.user_id = User.user_id where Post.delete_flag = 0 ";
     if(isset($keyword)) {
         $query .= " and content like '%".$keyword."%' ";
     }
-    $query .=" order by Post.createTime DESC limit ".$lastIdx.",10;";
+    $query .=" order by Post.created_time DESC limit ".$lastIdx.",10;";
     //댓글 카운트와 like카운트
     $st = $pdo->prepare($query);
     $st->execute();
@@ -174,7 +174,7 @@ function deletePost($post_id){
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
-        $query = "UPDATE Post set isDeleted = 1 WHERE post_id = ? ;";
+        $query = "UPDATE Post set delete_flag = 1 WHERE post_id = ? ;";
 
         $st = $pdo->prepare($query);
         $st->execute([$post_id]);
@@ -224,7 +224,7 @@ function deleteLikePost($user_id,$post_id){
 
 function getLikeCnt($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select count(*) as likeCnt from PostLike where post_id = ?;";
+    $query = "select count(*) as like_cnt from PostLike where post_id = ?;";
     $st = $pdo->prepare($query);
     $st->execute([$post_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -232,7 +232,7 @@ function getLikeCnt($post_id){
 }
 function getCommentCnt($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select count(*) as CommentCnt from Comment where post_id = ? and isDeleted = 0;";
+    $query = "select count(*) as Comment_cnt from Comment where post_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$post_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -263,7 +263,7 @@ function updateComment($comment_id,$content){
 
 function deleteComment($comment_id){
     $pdo = pdoSqlConnect();
-    $query = "UPDATE Comment set isDeleted = 1 WHERE comment_id = ? ;";
+    $query = "UPDATE Comment set delete_flag = 1 WHERE comment_id = ? ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$comment_id]);
@@ -274,7 +274,7 @@ function deleteComment($comment_id){
 
 function checkPostPermission($user_id,$post_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM Post WHERE post_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $query = "SELECT EXISTS(SELECT * FROM Post WHERE post_id = ? and user_id = ? and delete_flag =0) As exist; ";
     $st = $pdo->prepare($query);
     $st->execute([$post_id, $user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -287,7 +287,7 @@ function checkPostPermission($user_id,$post_id){
 
 function checkCommentPermission($user_id,$comment_id){
     $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE comment_id = ? and user_id = ? and isDeleted =0) As exist; ";
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE comment_id = ? and user_id = ? and delete_flag =0) As exist; ";
     $st = $pdo->prepare($query);
     $st->execute([$comment_id, $user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);

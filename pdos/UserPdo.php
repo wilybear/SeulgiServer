@@ -1,16 +1,16 @@
 <?php
 
 function createUser($name,$email,$nick,$profileURL,$phone
-                ,$birth,$SNS,$sex,$snsToken,$FCMToken)
+                ,$birth,$sns,$sex,$snsToken,$FCMToken)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
         $query = "INSERT INTO User (user_name,user_email,nick_name,phone
-, birth, SNS, sex, snsToken,FCMToken,profile_img) VALUES (?,?,?,?,?,?,?,?,?,?);";
+, birth, sns, sex, sns_token,fcm_token,profile_img) VALUES (?,?,?,?,?,?,?,?,?,?);";
         $st = $pdo->prepare($query);
         $st->execute([$name, $email, $nick, $phone
-            , $birth, $SNS, $sex, $snsToken, $FCMToken,$profileURL]);
+            , $birth, $sns, $sex, $snsToken, $FCMToken,$profileURL]);
 
         /*
         $user_id = $pdo->lastInsertId();
@@ -54,7 +54,7 @@ function createUser($name,$email,$nick,$profileURL,$phone
 function getUserInfo($user_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT user_name,user_email,nick_name,profile_img,phone
-,birth, sex,YEAR(CURDATE()) - YEAR(birth) AS age FROM User WHERE user_id= ? and isDeleted = 0 ;";
+,birth, sex,YEAR(CURDATE()) - YEAR(birth) AS age FROM User WHERE user_id= ? and delete_flag = 0 ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
@@ -76,7 +76,7 @@ function updateUser($nick,$profileImg,$phone
     ,$user_id){
     $pdo = pdoSqlConnect();
     //user 확인 필요, img update 처리
-//    $query = "SELECT profile_img FROM User WHERE user_id = ? and isDeleted = 0;";
+//    $query = "SELECT profile_img FROM User WHERE user_id = ? and delete_flag = 0;";
 //    $st = $pdo->prepare($query);
 //    $st->execute([$user_id]);
 //    $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -106,7 +106,7 @@ function updateUser($nick,$profileImg,$phone
 //    }
 
     $query = "UPDATE User SET nick_name = ?,profile_img = ?,phone = ?
- WHERE user_id= ? and isDeleted = 0";
+ WHERE user_id= ? and delete_flag = 0";
 
 
     $st = $pdo->prepare($query);
@@ -120,7 +120,7 @@ function updateUser($nick,$profileImg,$phone
 function deleteUser($user_id){
     $pdo = pdoSqlConnect();
     //user 확인
-    $query = "UPDATE User SET isDeleted = 1 WHERE user_id= ? and isDeleted = 0";
+    $query = "UPDATE User SET delete_flag = 1 WHERE user_id= ? and delete_flag = 0";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_id]);
@@ -165,7 +165,7 @@ function getUserNoFromHeader($jwt, $key)
     try {
         $data = getDataByJWToken($jwt, $key);
         $pdo = pdoSqlConnect();
-        $query = "SELECT user_id FROM User WHERE user_id = ? and isDeleted = 0";
+        $query = "SELECT user_id FROM User WHERE user_id = ? and delete_flag = 0";
 
         $st = $pdo->prepare($query);
         $st->execute([$data->id]);

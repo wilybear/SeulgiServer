@@ -76,7 +76,7 @@ try {
             }
 
 
-           createResume($userId,$req->title,$req->introduction,$req->talent_images,$req->isOnLine
+           createResume($userId,$req->title,$req->introduction,$req->talent_images,$req->online_flag
                 ,$req->desired_day,$req->desired_regions,$req->talent_have,$req->talent_want,$req->wish);
             $res->isSuccess = TRUE;
             $res->code = 100;
@@ -127,8 +127,11 @@ try {
             }
 
 
-            updateResume($req->resume_id,$userId,$req->title,$req->introduction,$req->talent_images,$req->isOnLine
-                ,$req->desired_day,$req->desired_regions,$req->talent_have,$req->talent_want,$req->wish);
+            if(!updateResume($req->resume_id,$userId,$req->title,$req->introduction,$req->talent_images,$req->online_flag
+                ,$req->desired_day,$req->desired_regions,$req->talent_have,$req->talent_want,$req->wish)){
+                failRes($res, "이력서 수정 실패.", 210);
+                break;
+            }
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 수정 성공";
@@ -188,7 +191,8 @@ try {
         case "getResumeList":
             http_response_code(200);
             // 유저가 scrap을 했는지 알아보기 위해서는 유저 아이디를 건내야한다.
-            $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],$_GET["isOnline"],$_GET["region"],$_GET["desired-day"],$_GET["lastIdx"]);
+            $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],
+                $_GET["online-flag"],$_GET["region"],$_GET["desired-day"],$_GET["lastIdx"],$_GET["detailedWant"],$_GET["detailedHave"]);
             if(empty($res->result)){
                 failRes($res, "더이상 교환서가 없습니다", 212);;
                 break;

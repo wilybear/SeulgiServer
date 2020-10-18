@@ -207,7 +207,7 @@ function checkIfExist($table, $col_args,$args){
     $tables = ["Comment","DetailWant","DetailHave","ExchangeRequest","Post","Region","DesiredDay","Review","TalentHave","TalentWant","User","TalentResume","TalentImage"];
     foreach ($tables as $_table){
         if($_table == $table) {
-            $query .= "AND isDeleted = 0 ";
+            $query .= "AND delete_flag = 0 ";
             break;
         }
     }
@@ -229,7 +229,7 @@ function checkIfIsDeleted($table, $col_args,$args){
     }
     $query = substr($query,0,-4);
     //if($table =="")
-    $query .="AND isDeleted = 1) AS exist;";
+    $query .="AND delete_flag = 1) AS exist;";
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
     $st->execute($args);

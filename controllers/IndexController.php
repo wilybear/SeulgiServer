@@ -36,7 +36,7 @@ try {
             $res->code = 100;
             $res->message = "테스트 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
-           break;
+            break;
         /*
          * API No. 0
          * API Name : 테스트 Path Variable API
@@ -96,16 +96,16 @@ try {
             }
             */
 
-            if(isset($req->profileImgFile) and !preg_match(URL_REGEX,$req->profileImgFile)){
+            if(isset($req->profile_img) and !preg_match(URL_REGEX,$req->profile_img)){
                 failRes($res,"이미지 url 형식 오류", 210);
                 break;
             }
 
             if (isset($req->name) and isset($req->email) and isset($req->nick) and isset($req->phone) and isset($req->birth)
-            and isset($req->SNS)) {
+                and isset($req->sns)) {
                 //$profileImgFile = $_FILES['image']['tmp_name'];
-                createUser($req->name, $req->email, $req->nick, $req->profileImgFile, $req->phone
-                    , $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
+                createUser($req->name, $req->email, $req->nick, $req->profile_img, $req->phone
+                    , $req->birth, $req->sns, $req->sex, $req->sns_token, $req->FCM_token);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "유저 생성 성공";
@@ -187,12 +187,12 @@ try {
                 failRes($res,"중복된 닉네임이 존재합니다.",203);
                 break;
             }
-            if(isset($req->profileImg) and !preg_match(URL_REGEX,$req->profileImg)){
+            if(isset($req->profile_img) and !preg_match(URL_REGEX,$req->profile_img)){
 
                 failRes($res,"이미지 url 오류", 210);
                 break;
             }
-            updateUser($req->nick,$req->profileImg,$req->phone
+            updateUser($req->nick,$req->profile_img,$req->phone
                 ,$userId);
             $res->isSuccess = TRUE;
             $res->code = 100;

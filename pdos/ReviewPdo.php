@@ -15,7 +15,7 @@ function createReview($reviewer_id,$resume_id,$content,$rate){
 function deleteReview($review_id)
 {
     $pdo = pdoSqlConnect();
-    $query = "UPDATE Review set isDeleted = 1 WHERE review_id = ? ;";
+    $query = "UPDATE Review set delete_flag = 1 WHERE review_id = ? ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$review_id]);
@@ -26,9 +26,9 @@ function deleteReview($review_id)
 
 function getReview($review_id){
     $pdo = pdoSqlConnect();
-    $query = "Select nick_name as reviewer_nick, profile_img,rate, content, Review.createTime
+    $query = "Select nick_name as reviewer_nick, profile_img,rate, content, Review.created_time
 from Review join User on Review.reviewer_id = User.user_id
-where review_id = ? and Review.isDeleted = 0;";
+where review_id = ? and Review.delete_flag = 0;";
 
     $st = $pdo->prepare($query);
     $st->execute([$review_id]);
@@ -51,9 +51,9 @@ where review_id = ? and Review.isDeleted = 0;";
 //해당 이력서의 모든 review들을 가지고옴
 function getReviews($resume_id){
     $pdo = pdoSqlConnect();
-    $query = "Select nick_name as reviewer_nick, profile_img,rate, content, Review.createTime
+    $query = "Select nick_name as reviewer_nick, profile_img,rate, content, Review.created_time
 from Review join User on Review.reviewer_id = User.user_id
-where resume_id = ? and Review.isDeleted = 0 order by Review.createTime DESC ;";
+where resume_id = ? and Review.delete_flag = 0 order by Review.created_time DESC ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
@@ -75,7 +75,7 @@ where resume_id = ? and Review.isDeleted = 0 order by Review.createTime DESC ;";
 function updateReview($review_id, $content, $rate){
     $pdo = pdoSqlConnect();
     //TODO: exchange기록이 있는 사람만, 여러번 제한, 자기 자신 불가
-    $query = "UPDATE Review SET content=?,rate=? WHERE review_id = ? AND isDeleted = 0";
+    $query = "UPDATE Review SET content=?,rate=? WHERE review_id = ? AND delete_flag = 0";
 
     $st = $pdo->prepare($query);
     $st->execute([$content,$rate,$review_id]);
@@ -88,7 +88,7 @@ function updateReview($review_id, $content, $rate){
 function checkReivewPermission($user_id,$review_id)
 {
     $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM Review WHERE review_id = ? and reviewer_id = ? and isDeleted =0) As exist; ";
+    $query = "SELECT EXISTS(SELECT * FROM Review WHERE review_id = ? and reviewer_id = ? and delete_flag =0) As exist; ";
     $st = $pdo->prepare($query);
     $st->execute([$review_id, $user_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
