@@ -5,33 +5,33 @@ function createPost($user_id, $content, $post_image)
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
-        $query = "INSERT INTO Post (user_id,content) VALUES (?,?);";
+        $query = "INSERT INTO Post (user_id,content,post_image) VALUES (?,?,?);";
         $st = $pdo->prepare($query);
-        $st->execute([$user_id, $content]);
-        $post_id = $pdo->lastInsertId();
-        if ($post_image != null) {
-            switch ($post_image{0}) {
-                case '/':
-                    $extension = 'jpg';
-                    break;
-                case 'i':
-                    $extension = 'png';
-                    break;
-                default:
-                    throw new Exception("wrong extension");
-            }
-            $binary = base64_decode($post_image);
-            $name = round(microtime(true) * 1000) . '.' . $extension;
-            // $filedest = UPLOAD_PATH . $name;
-            //move_uploaded_file($file, $filedest);
-            $file = fopen(POST_UPLOAD_PATH . $name, 'wb');
-            fwrite($file, $binary);
-            fclose($file);
-            //$url = $server_ip = gethostbyname(gethostname());
-            $query = "UPDATE Post SET post_image = ? WHERE post_id = ?";
-            $st = $pdo->prepare($query);
-            $st->execute([$name, $post_id]);
-        }
+        $st->execute([$user_id, $content,$post_image]);
+//        $post_id = $pdo->lastInsertId();
+//        if ($post_image != null) {
+//            switch ($post_image{0}) {
+//                case '/':
+//                    $extension = 'jpg';
+//                    break;
+//                case 'i':
+//                    $extension = 'png';
+//                    break;
+//                default:
+//                    throw new Exception("wrong extension");
+//            }
+//            $binary = base64_decode($post_image);
+//            $name = round(microtime(true) * 1000) . '.' . $extension;
+//            // $filedest = UPLOAD_PATH . $name;
+//            //move_uploaded_file($file, $filedest);
+//            $file = fopen(POST_UPLOAD_PATH . $name, 'wb');
+//            fwrite($file, $binary);
+//            fclose($file);
+//            //$url = $server_ip = gethostbyname(gethostname());
+//            $query = "UPDATE Post SET post_image = ? WHERE post_id = ?";
+//            $st = $pdo->prepare($query);
+//            $st->execute([$name, $post_id]);
+//        }
         $pdo->commit();
     } catch (Exception $e) {
         echo $e . "error on creating post";
@@ -46,37 +46,37 @@ function createPost($user_id, $content, $post_image)
 
 function updatePost($post_id,$content,$post_image){
     $pdo = pdoSqlConnect();
-    $query = "SELECT post_image FROM Post WHERE post_id = ?";
-    $st = $pdo->prepare($query);
-    $st->execute([$post_id]);
-    $st->setFetchMode(PDO::FETCH_ASSOC);
-    $res = $st->fetchAll();
-    if($res[0]["post_image"] != $post_image){
-        echo "post_image 바뀜";
-        if($res[0]["post_image"] != null) {
-            unlink(POST_UPLOAD_PATH . $res[0]["post_image"]);
-        }
-        if($post_image != null) {
-            switch ($post_image{0}) {
-                case '/':
-                    $extension = 'jpg';
-                    break;
-                case 'i':
-                    $extension = 'png';
-                    break;
-                default:
-                    throw new Exception("wrong extension");
-            }
-            $binary = base64_decode($post_image);
-            $name = round(microtime(true) * 1000) . '.' . $extension;
-            // $filedest = UPLOAD_PATH . $name;
-            //move_uploaded_file($file, $filedest);
-            $file = fopen(POST_UPLOAD_PATH . $name, 'wb');
-            fwrite($file, $binary);
-            fclose($file);
-            $post_image = $name;
-        }
-    }
+//    $query = "SELECT post_image FROM Post WHERE post_id = ?";
+//    $st = $pdo->prepare($query);
+//    $st->execute([$post_id]);
+//    $st->setFetchMode(PDO::FETCH_ASSOC);
+//    $res = $st->fetchAll();
+//    if($res[0]["post_image"] != $post_image){
+//        echo "post_image 바뀜";
+//        if($res[0]["post_image"] != null) {
+//            unlink(POST_UPLOAD_PATH . $res[0]["post_image"]);
+//        }
+//        if($post_image != null) {
+//            switch ($post_image{0}) {
+//                case '/':
+//                    $extension = 'jpg';
+//                    break;
+//                case 'i':
+//                    $extension = 'png';
+//                    break;
+//                default:
+//                    throw new Exception("wrong extension");
+//            }
+//            $binary = base64_decode($post_image);
+//            $name = round(microtime(true) * 1000) . '.' . $extension;
+//            // $filedest = UPLOAD_PATH . $name;
+//            //move_uploaded_file($file, $filedest);
+//            $file = fopen(POST_UPLOAD_PATH . $name, 'wb');
+//            fwrite($file, $binary);
+//            fclose($file);
+//            $post_image = $name;
+//        }
+//    }
     $query = "UPDATE Post set content = ?,post_image = ? WHERE post_id = ? ;";
 
     $st = $pdo->prepare($query);
@@ -88,8 +88,8 @@ function updatePost($post_id,$content,$post_image){
 
 function getPost($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select User.user_id,nick_name,profile_img, content, Post.createTime, post_image from Post
-join User on Post.user_id = User.user_id where post_id = ? and Post.isDeleted = 0;";
+    $query = "select User.user_id,nick_name,profile_img, content, Post.created_time, post_image from Post
+join User on Post.user_id = User.user_id where post_id = ? and Post.delete_flag = 0;";
 
 
     //댓글 카운트와 like카운트
@@ -101,25 +101,25 @@ join User on Post.user_id = User.user_id where post_id = ? and Post.isDeleted = 
         return false;
     }
 
-    if($res[0]['profile_img']!=null) {
-        $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $res[0]['profile_img'];
-        $res[0]['profile_img'] = $absurl;
-    }
-
-    if($res[0]['post_image']!=null) {
-        $absurl = 'http://' . gethostbyname(gethostname()) . POST_RETRIVE_PATH . $res[0]['post_image'];
-        $res[0]['post_image'] = $absurl;
-    }
+//    if($res[0]['profile_img']!=null) {
+//        $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $res[0]['profile_img'];
+//        $res[0]['profile_img'] = $absurl;
+//    }
+//
+//    if($res[0]['post_image']!=null) {
+//        $absurl = 'http://' . gethostbyname(gethostname()) . POST_RETRIVE_PATH . $res[0]['post_image'];
+//        $res[0]['post_image'] = $absurl;
+//    }
 
     $res[0] += getLikeCnt($post_id);
     $res[0] += getCommentCnt($post_id);
 
 
     //comment들 불러오기
-    $query = "select nick_name,content, User.user_id, profile_img,Comment.createTime,comment_id  from Comment
+    $query = "select nick_name,content, User.user_id, profile_img,Comment.created_time,comment_id  from Comment
 join User on Comment.user_id = User.user_id 
-where Comment.isDeleted = 0 and post_id = ? 
-order by Comment.createTime desc;
+where Comment.delete_flag = 0 and post_id = ? 
+order by Comment.created_time desc;
 ";
 
     //댓글 카운트와 like카운트
@@ -127,12 +127,12 @@ order by Comment.createTime desc;
     $st->execute([$post_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res[0]["comments"] = $st->fetchAll();
-    foreach ($res[0]["comments"] as &$comment){
-        if($comment['profile_img']!=null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $comment['profile_img'];
-            $comment['profile_img'] = $absurl;
-        }
-    }
+//    foreach ($res[0]["comments"] as &$comment){
+//        if($comment['profile_img']!=null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . PROFILE_RETRIVE_PATH . $comment['profile_img'];
+//            $comment['profile_img'] = $absurl;
+//        }
+//    }
 
     $st = null;
     $pdo = null;
@@ -140,22 +140,25 @@ order by Comment.createTime desc;
     return $res;
 }
 
-function getPostList($filter){
+function getPostList($keyword,$lastIdx){
     $pdo = pdoSqlConnect();
     //filter 미구현
-    $query = "select post_id, nick_name,content, Post.createTime, post_image from Post
-join User on Post.user_id = User.user_id where Post.isDeleted = 0 order by Post.createTime desc
-limit 0, 5;";
+    $query = "select post_id, nick_name,content, Post.created_time, post_image from Post
+join User on Post.user_id = User.user_id where Post.delete_flag = 0 ";
+    if(isset($keyword)) {
+        $query .= " and content like '%".$keyword."%' ";
+    }
+    $query .=" order by Post.created_time DESC limit ".$lastIdx.",10;";
     //댓글 카운트와 like카운트
     $st = $pdo->prepare($query);
     $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     foreach($res as &$post){
-        if($post['post_image']!=null) {
-            $absurl = 'http://' . gethostbyname(gethostname()) . POST_RETRIVE_PATH . $post['post_image'];
-            $post['post_image'] = $absurl;
-        }
+//        if($post['post_image']!=null) {
+//            $absurl = 'http://' . gethostbyname(gethostname()) . POST_RETRIVE_PATH . $post['post_image'];
+//            $post['post_image'] = $absurl;
+//        }
 
         $post += getLikeCnt($post['post_id']);
         $post += getCommentCnt($post['post_id']);
@@ -171,7 +174,7 @@ function deletePost($post_id){
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
-        $query = "UPDATE Post set isDeleted = 1 WHERE post_id = ? ;";
+        $query = "UPDATE Post set delete_flag = 1 WHERE post_id = ? ;";
 
         $st = $pdo->prepare($query);
         $st->execute([$post_id]);
@@ -221,7 +224,7 @@ function deleteLikePost($user_id,$post_id){
 
 function getLikeCnt($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select count(*) as likeCnt from PostLike where post_id = ?;";
+    $query = "select count(*) as like_cnt from PostLike where post_id = ?;";
     $st = $pdo->prepare($query);
     $st->execute([$post_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -229,7 +232,7 @@ function getLikeCnt($post_id){
 }
 function getCommentCnt($post_id){
     $pdo = pdoSqlConnect();
-    $query = "select count(*) as CommentCnt from Comment where post_id = ? and isDeleted = 0;";
+    $query = "select count(*) as Comment_cnt from Comment where post_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$post_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -260,11 +263,37 @@ function updateComment($comment_id,$content){
 
 function deleteComment($comment_id){
     $pdo = pdoSqlConnect();
-    $query = "UPDATE Comment set isDeleted = 1 WHERE comment_id = ? ;";
+    $query = "UPDATE Comment set delete_flag = 1 WHERE comment_id = ? ;";
 
     $st = $pdo->prepare($query);
     $st->execute([$comment_id]);
 
     $st = null;
     $pdo = null;
+}
+
+function checkPostPermission($user_id,$post_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Post WHERE post_id = ? and user_id = ? and delete_flag =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$post_id, $user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
+}
+
+function checkCommentPermission($user_id,$comment_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE comment_id = ? and user_id = ? and delete_flag =0) As exist; ";
+    $st = $pdo->prepare($query);
+    $st->execute([$comment_id, $user_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return intval($res[0]["exist"]);
 }

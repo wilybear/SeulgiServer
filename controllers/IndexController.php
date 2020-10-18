@@ -2,6 +2,8 @@
 require 'function.php';
 
 const JWT_SECRET_KEY = "TEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEY";
+$nick_regex="/^[!^\x{1100}-\x{11FF}\x{3130}-\x{318F}\x{AC00}-\x{D7AF}0-9a-zA-Z]{4,15}$/u";
+
 
 $res = (Object)Array();
 header('Content-Type: json');
@@ -34,7 +36,7 @@ try {
             $res->code = 100;
             $res->message = "테스트 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
-           break;
+            break;
         /*
          * API No. 0
          * API Name : 테스트 Path Variable API
@@ -64,66 +66,178 @@ try {
 
         case "createUser":
             http_response_code(200);
-            if (isset($req->name)) {
+            $check_nick = preg_match($nick_regex,$req->nick);
+            if(checkIfExist("User",["phone"],[$req->phone])){
+                failRes($res,"해당 전화번호로 가입한 이력이 존재합니다.",203);
+                break;
+            }
+            if(!preg_match("/^[_\.0-9a-zA-Z-]+@([0-9a-zA-Z][0-9a-zA-Z-]+\.)+[a-zA-Z]{2,6}$/i", $req->email)){
+                failRes($res,"올바르지 않은 이메일 형식입니다.",202);
+                break;
+            }
+            if(checkIfExist("User",["user_email"],[$req->email])){
+                failRes($res,"해당 이메일로 가입한 이력이 존재합니다.",203);
+                break;
+            }
+
+            if($check_nick!=true){
+                failRes($res,"올바르지 않은 닉네임입니다.",202);
+                //4~15자 영어 숫자 한글만
+                break;
+            }
+            if(checkIfExist("User",["nick_name"],[$req->nick])){
+                failRes($res,"중복된 닉네임이 존재합니다.",203);
+                break;
+            }
+            /*
+            if(isset($req->profileImgFile) and !checkImageExt($req->profileImgFile)){
+                failRes($res,"이미지 파일 형식 오류", 210);
+                break;
+            }
+            */
+
+            if(isset($req->profile_img) and !preg_match(URL_REGEX,$req->profile_img)){
+                failRes($res,"이미지 url 형식 오류", 210);
+                break;
+            }
+
+            if (isset($req->name) and isset($req->email) and isset($req->nick) and isset($req->phone) and isset($req->birth)
+                and isset($req->sns)) {
                 //$profileImgFile = $_FILES['image']['tmp_name'];
-                $res->result = createUser($req->name, $req->email, $req->nick, $req->profileImgFile, $req->phone
-                    , $req->region, $req->birth, $req->SNS, $req->sex, $req->snsToken, $req->FCMToken);
+                createUser($req->name, $req->email, $req->nick, $req->profile_img, $req->phone
+                    , $req->birth, $req->sns, $req->sex, $req->sns_token, $req->FCM_token);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "유저 생성 성공";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
             }else{
                 $res->isSuccess = FALSE;
-                $res->code = 200;
-                $res->message = "image 파라미터 체크해주세요";
+                $res->code = 211;
+                $res->message = "파라미터 오류.";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
             }
-            echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "deleteUser":
             http_response_code(200);
-            $res->result = deleteUser($vars["user-id"]);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+            if(checkIfIsDeleted("User",["user_id"],[$userId])){
+                failRes($res,"이미 탈퇴된 id입니다",204);
+                break;
+            }
+            if(!checkIfExist("User",["user_id"],[$userId])){
+                failRes($res,"존재하지 않는 아이디 입니다.",204);
+                break;
+            }
+            $res->result = deleteUser($userId);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 삭제 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "getUserInfo":
+
             http_response_code(200);
-            $res->result = getUserInfo($vars["user-id"]);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkIfExist("User",["user_id"],[$userId])){
+                failRes($res,"존재하지 않는 아이디 입니다.",204);
+                break;
+            }
+
+            $res->result = getUserInfo($userId);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 조회 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         case "updateUser":
-                http_response_code(200);
-            $res->result = updateUser($req->nick,$req->profileImg,$req->phone
-                ,$req->region,$req->user_id);
+            http_response_code(200);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkIfExist("User",["user_id"],[$userId])){
+                failRes($res,"존재하지 않는 아이디 입니다.",204);
+                break;
+            }
+            $check_nick = preg_match($nick_regex,$req->nick);
+            if($check_nick!=true) {
+                failRes($res, "올바르지 않은 닉네임입니다.", 202);
+                //4~15자 영어 숫자 한글만
+                break;
+            }
+            if(checkIfExist("User",["nick_name"],[$req->nick])){
+                failRes($res,"중복된 닉네임이 존재합니다.",203);
+                break;
+            }
+            if(isset($req->profile_img) and !preg_match(URL_REGEX,$req->profile_img)){
+
+                failRes($res,"이미지 url 오류", 210);
+                break;
+            }
+            updateUser($req->nick,$req->profile_img,$req->phone
+                ,$userId);
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "유저 수정 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-        case "getImages":
-            http_response_code(200);
-            $res->result = getAllFiles();
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "이미지 조회 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
         case "reportContent":
             http_response_code(200);
-            //TODO JWT 체크
-            if(!checkIfExist("Report",["user_id","id","report_type"],[$req->user_id,$req->id,$req->report_type])){
-                reportContent($req->user_id,$req->id,$req->report_type);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            switch ($req->report_type){
+                case 'comment':
+                    $tp = checkIfExist("Comment",["comment_id"],[$req->id]);
+                    break;
+                case 'post':
+                    $tp = checkIfExist("Post",["post_id"],[$req->id]);
+                    break;
+                case 'resume':
+                    $tp = checkIfExist("TalentResume",["resume_id"],[$req->id]);
+                    break;
+                case 'user':
+                    $tp = checkIfExist("User",["user_id"],[$req->id]);
+                    break;
+                default:
+                    failRes($res,"올바르지 않은 type입니다.",211);
+                    break;
+            }
+            if(!$tp){
+                failRes($res,"존재하지 않는 content입니다.",204);
+                break;
+            }
+            if(!checkIfExist("Report",["user_id","id","report_type"],[$userId ,$req->id,$req->report_type])){
+                reportContent($userId ,$req->id,$req->report_type);
                 $res->message = "신고 성공";
                 $res->isSuccess = TRUE;
                 $res->code = 100;
             }else{
-                $res->message = "이미 신고 했습니다";
-                $res->isSuccess = FALSE;
-                $res->code = 100;
+                failRes($res,"이미 신고했습니다.",203);
             }
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;

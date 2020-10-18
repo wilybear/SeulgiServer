@@ -17,6 +17,7 @@ define("RESUME_UPLOAD_PATH",dirname(__FILE__)."/uploads/resume/");
 define("RESUME_RETRIVE_PATH","/uploads/resume/");
 define("POST_UPLOAD_PATH",dirname(__FILE__)."/uploads/community/");
 define("POST_RETRIVE_PATH","/uploads/community/");
+define("URL_REGEX","/\bhttps?:\/\/\S+(?:png|jpg|jpeg)\b/");
 
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
@@ -37,41 +38,42 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     /***** User ******/
     $r->addRoute('POST', '/user', ['IndexController', 'createUser']);
-    $r->addRoute('PATCH', '/user', ['IndexController', 'updateUser']);
-    $r->addRoute('DELETE', '/user/{user-id}', ['IndexController', 'deleteUser']);
-    $r->addRoute('GET', '/user/{user-id}', ['IndexController', 'getUserInfo']);
+    $r->addRoute('PUT', '/user', ['IndexController', 'updateUser']);
+    $r->addRoute('DELETE', '/user', ['IndexController', 'deleteUser']);
+    $r->addRoute('GET', '/user', ['IndexController', 'getUserInfo']);
     $r->addRoute('GET', '/upload', ['IndexController', 'getImages']);
 
 
     /***** Seulgi *****/
     //교환서
     $r->addRoute('POST', '/seulgi/resume', ['SeulgiController', 'createResume']);
-    $r->addRoute('PATCH', '/seulgi/resume', ['SeulgiController', 'updateResume']);
+    $r->addRoute('PUT', '/seulgi/resume', ['SeulgiController', 'updateResume']);
     $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
     $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
     $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
 
     //교환서 상세 페이지
-    $r->addRoute('GET', '/resume-info/basic/{resume-id}', ['SeulgiController', 'getResumeBasic']);
-    $r->addRoute('GET', '/resume-info/talent-have/{resume-id}', ['SeulgiController', 'getTalentHave']);
-    $r->addRoute('GET', '/resume-info/talent-want/{resume-id}', ['SeulgiController', 'getTalentWant']);
-    $r->addRoute('GET', '/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
-    $r->addRoute('GET', '/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
+    $r->addRoute('GET', '/seulgi/resume-info/basic/{resume-id}', ['SeulgiController', 'getResumeBasic']);
+    $r->addRoute('GET', '/seulgi/resume-info/talent-have/{resume-id}', ['SeulgiController', 'getTalentHave']);
+    $r->addRoute('GET', '/seulgi/resume-info/talent-want/{resume-id}', ['SeulgiController', 'getTalentWant']);
+    $r->addRoute('GET', '/seulgi/resume-info/desired-opt/{resume-id}', ['SeulgiController', 'getDesiredOpt']);
+    $r->addRoute('GET', '/seulgi/resume-info/reviews/{resume-id}', ['SeulgiController', 'getResumeReviews']);
 
     //후기
     $r->addRoute('POST', '/review', ['ReviewController', 'createReview']);
-    $r->addRoute('GET', '/review', ['ReviewController', 'getReviews']);
-    $r->addRoute('DELETE', '/review/{reviewId}', ['ReviewController', 'deleteReview']);
-    $r->addRoute('PATCH', '/review', ['ReviewController', 'updateReview']);
+    $r->addRoute('GET', '/review/{review-id}', ['ReviewController', 'getReviews']);
+    $r->addRoute('DELETE', '/review/{review-id}', ['ReviewController', 'deleteReview']);
+    $r->addRoute('PUT', '/review', ['ReviewController', 'updateReview']);
 
     //요청
     $r->addRoute('POST', '/exchange-management/exchange', ['ExchangeController', 'createExchangeReq']);
     $r->addRoute('GET', '/exchange-management/received-exchanges/{user-id}', ['ExchangeController', 'getReceivedExchangeReqs']);
     $r->addRoute('GET', '/exchange-management/sended-exchanges/{user-id}', ['ExchangeController', 'getSendedExchangeReqs']);
-    $r->addRoute('GET', '/exchange-management/exchanged-exchanges/{user-id}', ['ExchangeController', 'getExchangedReqs']);
-    $r->addRoute('PATCH', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
+    $r->addRoute('GET', '/exchange-management/exchanges', ['ExchangeController', 'getExchangedReqs']);
+    $r->addRoute('PUT', '/exchange-management/accept-exchange', ['ExchangeController', 'acceptExchangeReq']);
     $r->addRoute('GET', '/exchange-management/exchange-result', ['ExchangeController', 'ExchangeInfo']);
     $r->addRoute('GET', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'getExchangeReq']);
+    $r->addRoute('DELETE', '/exchange-management/exchange/{exchange-id}', ['ExchangeController', 'deleteExchangeReq']);
 
     //화면 기능들
     $r->addRoute('GET', '/home/resume-list', ['SeulgiController', 'getResumeList']);
@@ -79,14 +81,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     //피드 기능
     $r->addRoute('POST', '/post', ['PostController', 'createPost']);
-    $r->addRoute('PATCH', '/post', ['PostController', 'updatePost']);
+    $r->addRoute('PUT', '/post', ['PostController', 'updatePost']);
     $r->addRoute('GET', '/post/{post-id}', ['PostController', 'getPost']);
     $r->addRoute('GET', '/post-list', ['PostController', 'getPostList']);
-    $r->addRoute('DELETE', '/post', ['PostController', 'deletePost']);
+    $r->addRoute('DELETE', '/post/{post-id}', ['PostController', 'deletePost']);
     $r->addRoute('POST', '/post/like', ['PostController', 'likePost']);
     $r->addRoute('POST', '/post/comment', ['PostController', 'createComment']);
-    $r->addRoute('PATCH', '/post/comment', ['PostController', 'updateComment']);
-    $r->addRoute('DELETE', '/post/comment', ['PostController', 'deleteComment']);
+    $r->addRoute('PUT', '/post/comment', ['PostController', 'updateComment']);
+    $r->addRoute('DELETE', '/post/comment/{comment-id}', ['PostController', 'deleteComment']);
 
     //신고 기능
     $r->addRoute('POST', '/report', ['IndexController', 'reportContent']);
@@ -168,27 +170,27 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/PostController.php';
                 break;
-                /*
-            case 'ProductController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ProductController.php';
-                break;
-            case 'SearchController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/SearchController.php';
-                break;
-            case 'ReviewController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ReviewController.php';
-                break;
-            case 'ElementController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/ElementController.php';
-                break;
-            case 'AskFAQController':
-                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/AskFAQController.php';
-                break;*/
+            /*
+        case 'ProductController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ProductController.php';
+            break;
+        case 'SearchController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/SearchController.php';
+            break;
+        case 'ReviewController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ReviewController.php';
+            break;
+        case 'ElementController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/ElementController.php';
+            break;
+        case 'AskFAQController':
+            $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+            require './controllers/AskFAQController.php';
+            break;*/
         }
 
         break;
