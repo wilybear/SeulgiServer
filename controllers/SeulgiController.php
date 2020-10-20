@@ -192,7 +192,7 @@ try {
             http_response_code(200);
             // 유저가 scrap을 했는지 알아보기 위해서는 유저 아이디를 건내야한다.
             $res->result = getResumeList($_GET["user-id"],$_GET["filter"],$_GET["talent-want"],$_GET["talent-have"],
-                $_GET["online-flag"],$_GET["region"],$_GET["desired-day"],$_GET["lastIdx"],$_GET["detailedWant"],$_GET["detailedHave"]);
+                $_GET["online-flag"],$_GET["region"],$_GET["desired-day"],$_GET["lastIdx"],$_GET["detailed-want"],$_GET["detailed-have"]);
             if(empty($res->result)){
                 failRes($res, "더이상 교환서가 없습니다", 212);;
                 break;
@@ -289,6 +289,54 @@ try {
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "교환서 리뷰들 불러오기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "uploadResume":
+            http_response_code(200);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkIfExist("TalentResume",["resume_id"],[$req->resume_id])){
+                failRes($res, "존재하지 않는 교환서입니다.", 204);
+                break;
+            }
+            if(!checkResumePermission($req->resume_id,$userId)){
+                failRes($res, "교환서 수정 권한이 없습니다.", 205);
+                break;
+            }
+            updateUploadFlag($req->resume_id,1);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 개재 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        case "cancelUpload":
+            http_response_code(200);
+            $jwt = $_SERVER["HTTP_X_ACCESS_TOKEN"];
+            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                failRes($res,"유효하지 않은 토큰입니다",201);
+                addErrorLogs($errorLogs, $res, $req);
+                break;
+            }
+            $userId = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
+
+            if(!checkIfExist("TalentResume",["resume_id"],[$req->resume_id])){
+                failRes($res, "존재하지 않는 교환서입니다.", 204);
+                break;
+            }
+            if(!checkResumePermission($req->resume_id,$userId)){
+                failRes($res, "교환서 수정 권한이 없습니다.", 205);
+                break;
+            }
+            updateUploadFlag($req->resume_id,0);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "교환서 개재 취소 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
     }

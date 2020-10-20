@@ -7,7 +7,7 @@ function createUser($name,$email,$nick,$profileURL,$phone
     try {
         $pdo->beginTransaction();
         $query = "INSERT INTO User (user_name,user_email,nick_name,phone
-, birth, sns, sex, sns_token,fcm_token,profile_img) VALUES (?,?,?,?,?,?,?,?,?,?);";
+, birth, sns, sex, sns_id,fcm_token,profile_img) VALUES (?,?,?,?,?,?,?,?,?,?);";
         $st = $pdo->prepare($query);
         $st->execute([$name, $email, $nick, $phone
             , $birth, $sns, $sex, $snsToken, $FCMToken,$profileURL]);
@@ -182,3 +182,16 @@ function getUserNoFromHeader($jwt, $key)
     }
 }
 
+function getUserIdBySNS($type,$sns_id){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT user_id FROM User WHERE sns_id= ? and sns = ? and delete_flag = 0 ;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$sns_id,$type]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+    return $res[0]["user_id"];
+}

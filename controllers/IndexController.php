@@ -55,6 +55,43 @@ try {
          * API Name : 테스트 Body & Insert API
          * 마지막 수정 날짜 : 19.04.29
          */
+        case "login":
+            http_response_code(200);
+            //$res->result = testPost($req->name);
+//            $helper = new Kakao_REST_API_Helper('f5df6fb3c404bdcc96cacb1745be50c8');
+//            $helper->set_admin_key('4449268bfb17b9ec9ea52899e34fc683');
+//            $helper->test_user_management_api();
+//            print_r($helper);
+
+            $sns = (Object)Array();
+            switch ($req->type){
+                case "kakao":
+                    $sns = kakaoAuth($req->access_token);
+                    break;
+                case "facebook":
+                    break;
+                case "google":
+                    break;
+            }
+            $sns->type = $req->type;
+            if(checkIfExist("User",["sns","sns_id"],[$req->type,$sns->userId])){
+                //이미 가입된 사람
+                $userId = getUserIdBySNS($req->type,$sns->userId);
+                $jwt = getJWToken($userId,$sns->userId, JWT_SECRET_KEY);
+                $res->res = $sns;
+                $res->res->jwt = $jwt;
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "이미 회원가입함";
+            }else{
+                $res->res= $sns;
+                $res->isSuccess = TRUE;
+                $res->code = 100;
+                $res->message = "회원가입 필요";
+            }
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
         case "testPost":
             http_response_code(200);
             $res->result = testPost($req->name);

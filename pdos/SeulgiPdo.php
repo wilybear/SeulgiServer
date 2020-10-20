@@ -315,7 +315,7 @@ function getResumeData($resume_id){
     $pdo = pdoSqlConnect();
 
     //이력서 기본정보 불러오기
-    $query = "SELECT user_id, title, introduction, online_flag, wish FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
+    $query = "SELECT user_id, title, introduction, online_flag, wish,upload_flag FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -444,6 +444,21 @@ function getDetailedCategoryId($detailed,$category_id){
     return $res[0]["detailed_cat_id"];
 }
 
+function getDetailedCategoryIdWithName($detailed){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT detailed_cat_id FROM DetailedCat WHERE cat_name = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$detailed]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]["detailed_cat_id"];
+}
+
 function scrapResume($user_id, $resume_id){
     $pdo = pdoSqlConnect();
     $query = "INSERT INTO ResumeScrap (user_id,resume_id) VALUES (?,?)";
@@ -468,7 +483,7 @@ function deleteScrapResume($user_id, $resume_id){
 
 function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$region,$desired_day,$lastIdx,$detailedWant,$detailedHave){
     $pdo = pdoSqlConnect();
-    $query = "select TR.resume_id, title, TR.created_time, hit ,rate from TalentResume as TR Where delete_flag=0 and ";
+    $query = "select TR.resume_id, title, TR.created_time, hit ,rate from TalentResume as TR Where delete_flag=0 and upload_flag = 1 and ";
 
     if(isset($online_flag)){
         $query .= "TR.online_flag = ".$online_flag." and " ;
@@ -513,7 +528,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$re
     if(isset($detailedWant)){
         $query .= "exists(select * from DetailedWant as TW where TR.resume_id = TW.resume_id and (";
         foreach ($detailedWant as $talent) {
-            $cat_id = getDetailedCategoryId($talent);
+            $cat_id = getDetailedCategoryIdWithName($talent);
             if($i == $len-1) {
                 $query .= "TW.detailed_cat_id = " . $cat_id;
             }else {
@@ -530,7 +545,7 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$re
     if(isset($detailedHave)){
         $query .= "exists(select * from DetailedHave as TW where TR.resume_id = TW.resume_id and (";
         foreach ($detailedHave as $talent) {
-            $cat_id = getDetailedCategoryId($talent);
+            $cat_id =  getDetailedCategoryIdWithName($talent);
             if($i == $len-1) {
                 $query .= "TW.detailed_cat_id = " . $cat_id;
             }else {
@@ -654,6 +669,19 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$re
 
     return $res;
 }
+
+function updateUploadFlag($resume_id,$flag){
+    $pdo = pdoSqlConnect();
+
+    //조회수 상승
+    $query = "UPDATE TalentResume SET upload_flag = ? WHERE resume_id = ?";
+    $st = $pdo->prepare($query);
+    $st->execute([$flag,$resume_id]);
+
+    $st = null;
+    $pdo = null;
+}
+
 
 function checkResumePermission($resume_id,$user_id){
     $pdo = pdoSqlConnect();

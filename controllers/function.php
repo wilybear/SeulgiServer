@@ -92,11 +92,12 @@ function getTodayByTimeStamp()
     return date("Y-m-d H:i:s");
 }
 
-function getJWToken($id, $secretKey)
+function getJWToken($id,$sns_id,$secretKey)
 {
     $data = array(
         'date' => (string)getTodayByTimeStamp(),
-        'id' => (string)$id
+        'id' => (string)$id,
+        'sns_id' => (string)$sns_id
     );
 
 //    echo json_encode($data);
@@ -252,4 +253,34 @@ function failRes($res,$message,$code){
     $res->code = $code;
     $res->message = $message;
     echo json_encode($res, JSON_NUMERIC_CHECK);
+}
+
+function kakaoAuth($access_token){
+    $header = "Bearer ".$access_token; // Bearer 다음에 공백 추가
+    $getProfileUrl = "https://kapi.kakao.com/v2/user/me";
+
+    $isPost = false;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $getProfileUrl);
+    curl_setopt($ch, CURLOPT_POST, $isPost);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $headers = array();
+    $headers[] = "Authorization: ".$header;
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $profileResponse = curl_exec ($ch);
+    $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close ($ch);
+
+  //  var_dump($profileResponse); // Kakao API 서버로 부터 받아온 값
+
+    $profileResponse = json_decode($profileResponse);
+
+    $temp = (Object)Array();
+    $temp->userId = $profileResponse->id;
+   // $userName = $profileResponse->properties->nickname;
+    $temp->userEmail = $profileResponse->kakao_account->email;
+
+    return $temp;
 }

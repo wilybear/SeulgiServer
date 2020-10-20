@@ -55,7 +55,7 @@ try {
             }
 
             //페이로드에 맞게 다시 설정 요함
-            $jwt = getJWToken($req->id, JWT_SECRET_KEY);
+            $jwt = getJWToken($req->id,$req->sns_id, JWT_SECRET_KEY);
             $res->result->jwt = $jwt;
             $res->isSuccess = TRUE;
             $res->code = 100;
