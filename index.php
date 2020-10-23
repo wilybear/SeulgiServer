@@ -18,6 +18,7 @@ define("RESUME_RETRIVE_PATH","/uploads/resume/");
 define("POST_UPLOAD_PATH",dirname(__FILE__)."/uploads/community/");
 define("POST_RETRIVE_PATH","/uploads/community/");
 define("URL_REGEX","/\bhttps?:\/\/\S+(?:png|jpg|jpeg)\b/");
+define("GOOGLE_API_KEY","AAAAEAHqjGo:APA91bEMrNSojahDB6eQkXyJ5xLhA6ZmBd61mKa6AXJoixjM_Y1gD8xyx5RbfkBIgp6dbOR-rbziPH73ke5aW-1c6oY2Pu7QkVGAbSi9tDpV0UOkeNLfqO0fQuNk-4E2YGQYYOM-oE4N");
 
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
@@ -50,6 +51,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PUT', '/seulgi/resume', ['SeulgiController', 'updateResume']);
     $r->addRoute('GET', '/seulgi/resume/{resume-id}', ['SeulgiController', 'getResume']);
     $r->addRoute('DELETE', '/seulgi/resume/{resume-id}', ['SeulgiController', 'deleteResume']);
+    $r->addRoute('POST', '/seulgi/resume/upload', ['SeulgiController', 'uploadResume']);
+    $r->addRoute('PUT', '/seulgi/resume/upload', ['SeulgiController', 'cancelUpload']);
     $r->addRoute('POST', '/seulgi/scrap', ['SeulgiController', 'scrapResume']);
 
     //교환서 상세 페이지
@@ -92,6 +95,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     //신고 기능
     $r->addRoute('POST', '/report', ['IndexController', 'reportContent']);
+    $r->addRoute('POST','/login',['IndexController','login']);
 
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');

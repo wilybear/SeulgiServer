@@ -13,7 +13,13 @@ function createExchangeReq($sender_id,$resume_id){
     $st = $pdo->prepare($query);
     $st->execute([$sender_id,$resume_id,$receiver_id]);
 
-    //sendFcm($fcmToken, $data, $key, $deviceType)
+    $query = "SELECT fcm_token from User where user_id = ?";
+    $st = $pdo->prepare($query);
+    $st->execute([$receiver_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $fcmToken = $st->fetchAll()[0]["fcm_token"];
+
+    sendFcm($fcmToken, "새로운 교환 요청이 들어왔습니다!", GOOGLE_API_KEY, "AOS");
 
     $st = null;
     $pdo = null;
@@ -46,7 +52,13 @@ function acceptExchangeReq($exchange_id){
     $st = $pdo->prepare($query);
     $st->execute([$exchange_id]);
 
-    //sendFcm($fcmToken, $data, $key, $deviceType)
+    $query = "SELECT fcm_token from User where user_id = (select sender_id from ExchangeRequest where exchange_id = ?)";
+    $st = $pdo->prepare($query);
+    $st->execute([$exchange_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $fcmToken = $st->fetchAll()[0]["fcm_token"];
+
+    sendFcm($fcmToken, "교환 요청이 수락되었습니다!", GOOGLE_API_KEY, "AOS");
     $st = null;
     $pdo = null;
 }
