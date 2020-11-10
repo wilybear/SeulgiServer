@@ -1,19 +1,19 @@
 <?php
-
+//슬기 교환서(재능 교환서) pdos
 function createResume($user_id,$title,$introduction,$talent_images,$online_flag,$desired_day,$desired_regions,
                     $talent_have,$talent_want,$wish)
 {
     $pdo = pdoSqlConnect();
     try {
         $pdo->beginTransaction();
-        //교환서 기본 사항 저장 TODO: 중복처리
+      
+        //재능 교환서 기본 정보들
         $query = "INSERT INTO TalentResume (user_id,title, introduction, online_flag,wish) VALUES (?,?,?,?,?);";
         $st = $pdo->prepare($query);
         $st->execute([$user_id,$title,$introduction,$online_flag,$wish]);
         $resume_id = $pdo->lastInsertId();
-
-
-        //교환서 이미지 저장 TODO: 갯수 제한, 중복처리
+      
+        //재능 관련 이미지 받기 base64인코딩 형태->url
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         /*
@@ -37,16 +37,17 @@ function createResume($user_id,$title,$introduction,$talent_images,$online_flag,
             $st->execute([$resume_id,$name]);
         }
         */
+      
         foreach ($talent_images as $talent_image){
             $st->execute([$resume_id,$talent_image->talent_image]);
         }
 
-        //희망 요일 저장  TODO: 중복처리
+        //희망 요일 저장
         $query = "INSERT INTO DesiredDay (resume_id, mon, tue, wed, thu, fri, sat, sun) VALUES (?,?,?,?,?,?,?,?)";
         $st = $pdo->prepare($query);
         $st->execute([$resume_id,$desired_day->mon,$desired_day->tue,$desired_day->wed,$desired_day->thu,$desired_day->fri,$desired_day->sat,$desired_day->sun]);
 
-        //희망 지역 TODO: 중복처리
+        //희망 지역
         $query = "INSERT INTO Region (resume_id,desired_region) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($desired_regions as $desired_region){
@@ -116,7 +117,7 @@ function updateResume($resume_id,$user_id,$title,$introduction,$talent_images,$o
             $st->execute([$resume_id]);
         }
 
-        //이미지 추가,TODO: 중복, 수정시 발생
+        //이미지 추가
         $query = "INSERT INTO TalentImage (resume_id,talent_image) VALUES (?,?)";
         $st = $pdo->prepare($query);
         foreach ($talent_images as $talent_image){
@@ -193,6 +194,7 @@ function getBasicResumeData($resume_id,$user_id){
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
+  
     //이미지
     $query = "SELECT talent_image FROM TalentImage WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
@@ -219,6 +221,7 @@ function getBasicResumeData($resume_id,$user_id){
     return $res;
 }
 
+//보유 재능 탭 정보 가져오기
 function getTalentHave($resume_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT talent_cat_id,introduction,academic_bg,career,certificate,curriculum FROM TalentHave WHERE resume_id = ? and delete_flag = 0;";
@@ -243,6 +246,7 @@ function getTalentHave($resume_id){
     return $res;
 }
 
+//원하는 재능 탭 정보 가져오기
 function getTalentWant($resume_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT talent_cat_id ,desired_info FROM TalentWant WHERE resume_id = ? and delete_flag = 0;";
@@ -266,6 +270,7 @@ function getTalentWant($resume_id){
     return $res;
 }
 
+//희망사항 탭 정보 가져오기
 function getDesiredCondition($resume_id){
 
     $pdo = pdoSqlConnect();
@@ -275,7 +280,7 @@ function getDesiredCondition($resume_id){
     $st->execute([$resume_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll()[0];
-//요일 불러오기
+  //요일 불러오기
     $query = "SELECT mon, tue, wed,thu, fri,sat,sun FROM DesiredDay WHERE resume_id = ? and delete_flag = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$resume_id]);
@@ -295,6 +300,7 @@ function getDesiredCondition($resume_id){
     return $res;
 }
 
+//교환서 후기탭 정보 불러오기
 function getResumeReviews($resume_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT rate FROM TalentResume WHERE resume_id = ? and delete_flag = 0;";
@@ -311,6 +317,7 @@ function getResumeReviews($resume_id){
     return $res;
 }
 
+//이력서 전체 정보 불러오기
 function getResumeData($resume_id){
     $pdo = pdoSqlConnect();
 
@@ -384,6 +391,7 @@ function getResumeData($resume_id){
     return $res;
 }
 
+//이력서 삭제
 function deleteResume($resume_id){
     $pdo = pdoSqlConnect();
     try{
@@ -404,6 +412,7 @@ function deleteResume($resume_id){
     $pdo = null;
 }
 
+//category 이름으로 id가져오기
 function getCategoryId($category){
     $pdo = pdoSqlConnect();
     $query = "SELECT talent_cat_id FROM TalentCat WHERE cat_name = ? ;";
@@ -416,6 +425,7 @@ function getCategoryId($category){
     return $res[0]["talent_cat_id"];
 }
 
+//category id로 이름 가져오기
 function getCategoryName($category_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT cat_name FROM TalentCat WHERE talent_cat_id = ? ;";
@@ -429,6 +439,7 @@ function getCategoryName($category_id){
     return $res[0]["cat_name"];
 }
 
+//상세category 이름으로 id가져오기
 function getDetailedCategoryId($detailed,$category_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT detailed_cat_id FROM DetailedCat WHERE cat_name = ? and talent_cat_id = ?;";
@@ -444,6 +455,7 @@ function getDetailedCategoryId($detailed,$category_id){
     return $res[0]["detailed_cat_id"];
 }
 
+//상세category id로 이름 가져오기
 function getDetailedCategoryIdWithName($detailed){
     $pdo = pdoSqlConnect();
     $query = "SELECT detailed_cat_id FROM DetailedCat WHERE cat_name = ?;";
@@ -459,6 +471,7 @@ function getDetailedCategoryIdWithName($detailed){
     return $res[0]["detailed_cat_id"];
 }
 
+//교환서 스크랩
 function scrapResume($user_id, $resume_id){
     $pdo = pdoSqlConnect();
     $query = "INSERT INTO ResumeScrap (user_id,resume_id) VALUES (?,?)";
@@ -470,6 +483,7 @@ function scrapResume($user_id, $resume_id){
     $pdo = null;
 }
 
+//스크랩 해제
 function deleteScrapResume($user_id, $resume_id){
     $pdo = pdoSqlConnect();
     $query = "DELETE FROM ResumeScrap WHERE user_id = ? and resume_id = ?;";
@@ -481,6 +495,7 @@ function deleteScrapResume($user_id, $resume_id){
     $pdo = null;
 }
 
+//검색 쿼리, advanced filter(원하는, 보유한 재능 다중 선택, 지역, 요일, 온라인 여부 및 정렬 순 옵션 선택 )
 function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$region,$desired_day,$lastIdx,$detailedWant,$detailedHave){
     $pdo = pdoSqlConnect();
     $query = "select TR.resume_id, title, TR.created_time, hit ,rate from TalentResume as TR Where delete_flag=0 and upload_flag = 1 and ";
@@ -670,10 +685,10 @@ function getResumeList($user_id,$filter,$talentWant,$talentHave,$online_flag,$re
     return $res;
 }
 
+//임시저장된 교환서를 업로드 여부
 function updateUploadFlag($resume_id,$flag){
     $pdo = pdoSqlConnect();
 
-    //조회수 상승
     $query = "UPDATE TalentResume SET upload_flag = ? WHERE resume_id = ?";
     $st = $pdo->prepare($query);
     $st->execute([$flag,$resume_id]);
@@ -682,7 +697,7 @@ function updateUploadFlag($resume_id,$flag){
     $pdo = null;
 }
 
-
+//유저가 해당 교환서 수정에 권한이 있는지
 function checkResumePermission($resume_id,$user_id){
     $pdo = pdoSqlConnect();
     $query = "SELECT EXISTS(SELECT * FROM TalentResume WHERE resume_id = ? and user_id = ? and delete_flag =0) As exist; ";
